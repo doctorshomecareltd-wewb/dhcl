@@ -1,0 +1,2887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Doctors Home Care Limited — Client &amp; Payment Manager</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --teal-900:#0A3733;
+  --teal-800:#0E4A46;
+  --teal-700:#125953;
+  --teal-600:#157A72;
+  --mint-400:#2FD3BE;
+  --mint-300:#6EE3D3;
+  --mint-100:#E4FBF7;
+  --coral-500:#F0576A;
+  --coral-100:#FFE6EA;
+  --amber-500:#F2A93B;
+  --amber-100:#FFF2DC;
+  --violet-500:#7C6FEF;
+  --violet-100:#ECEAFE;
+  --bg:#F1F8F7;
+  --surface:#FFFFFF;
+  --ink:#0B2B29;
+  --ink-soft:#587471;
+  --ink-faint:#8AA3A0;
+  --border:#DDEEEB;
+  --shadow-card:0 14px 34px -16px rgba(10,55,51,.28), 0 2px 8px rgba(10,55,51,.06);
+  --shadow-pop:0 20px 46px -14px rgba(10,55,51,.4);
+  --radius:20px;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{margin:0;font-weight:800;letter-spacing:-0.02em;}
+p{margin:0;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+::selection{background:var(--mint-300);color:var(--teal-900);}
+
+.app{display:flex;min-height:100vh;}
+
+/* ---------- SIDEBAR ---------- */
+.sidebar{
+  width:250px;
+  flex:0 0 250px;
+  background:linear-gradient(190deg,var(--teal-900) 0%, var(--teal-800) 60%, var(--teal-700) 100%);
+  color:#EAFBF8;
+  display:flex;
+  flex-direction:column;
+  padding:26px 16px;
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow-y:auto;
+  z-index:60;
+}
+.brand{display:flex;align-items:center;gap:12px;padding:4px 8px 22px 8px;}
+.brand-mark{
+  width:44px;height:44px;border-radius:14px;
+  background:radial-gradient(circle at 30% 30%, var(--mint-300), var(--mint-400) 55%, var(--teal-600) 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  box-shadow:0 8px 18px -6px rgba(47,211,190,.65);
+  flex:0 0 auto;
+}
+.brand-text h1{font-size:15.5px;color:#fff;line-height:1.25;}
+.brand-text span{font-size:11px;color:#9FCFC9;font-weight:600;letter-spacing:.02em;}
+
+nav{display:flex;flex-direction:column;gap:3px;margin-top:8px;}
+.nav-btn{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 12px;border:none;background:transparent;color:#BFE4DF;
+  border-radius:12px;font-size:14px;font-weight:600;text-align:left;
+  position:relative;transition:background .15s ease, color .15s ease;
+}
+.nav-btn .ic{font-size:17px;width:22px;text-align:center;}
+.nav-btn:hover{background:rgba(255,255,255,.07);color:#fff;}
+.nav-btn.active{background:rgba(47,211,190,.16);color:#fff;}
+.nav-btn.active::before{
+  content:"";position:absolute;left:-16px;top:8px;bottom:8px;width:4px;
+  border-radius:4px;background:var(--mint-400);
+}
+.sidebar-foot{margin-top:auto;padding:14px 10px 4px;font-size:11px;color:#7FA9A4;line-height:1.5;}
+
+/* ---------- MAIN ---------- */
+main{flex:1;min-width:0;padding:26px 34px 60px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:14px;}
+.topbar h2{font-size:23px;}
+.topbar .sub{color:var(--ink-soft);font-size:13.5px;margin-top:3px;font-weight:500;}
+.topbar-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.topbar-title{display:flex;align-items:center;gap:14px;}
+
+.btn{
+  border-radius:12px;padding:10px 16px;font-size:13.5px;font-weight:700;border:none;
+  display:inline-flex;align-items:center;gap:7px;transition:transform .12s ease, box-shadow .12s ease;
+}
+.btn:active{transform:translateY(1px);}
+.btn-primary{background:linear-gradient(135deg,var(--teal-600),var(--teal-900));color:#fff;box-shadow:0 10px 22px -8px rgba(14,74,70,.55);}
+.btn-primary:hover{box-shadow:0 14px 26px -8px rgba(14,74,70,.65);}
+.btn-mint{background:linear-gradient(135deg,var(--mint-300),var(--mint-400));color:#063733;box-shadow:0 10px 22px -8px rgba(47,211,190,.55);}
+.btn-ghost{background:#fff;color:var(--teal-800);border:1.5px solid var(--border);}
+.btn-ghost:hover{border-color:var(--mint-400);}
+.btn-ghost.active-view{background:var(--mint-100);border-color:var(--mint-400);}
+.btn-danger{background:linear-gradient(135deg,#FF8A8A,var(--coral-500));color:#fff;box-shadow:0 10px 20px -8px rgba(240,87,106,.5);}
+.btn-sm{padding:6px 11px;font-size:12px;border-radius:9px;}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+
+/* ---------- STAT CARDS ---------- */
+.grid-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:22px;}
+@media(max-width:1250px){.grid-stats{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:760px){.grid-stats{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){.grid-stats{grid-template-columns:1fr;}}
+
+.stat-card{
+  position:relative;overflow:hidden;border-radius:var(--radius);padding:20px 20px 18px;
+  box-shadow:var(--shadow-card);color:#fff;min-height:112px;
+}
+.stat-card::after{
+  content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;
+  background:rgba(255,255,255,.14);
+}
+.stat-card::before{
+  content:"";position:absolute;right:10px;bottom:-46px;width:90px;height:90px;border-radius:50%;
+  background:rgba(255,255,255,.10);
+}
+.stat-card.c1{background:linear-gradient(135deg,var(--teal-600),var(--teal-900));}
+.stat-card.c2{background:linear-gradient(135deg,var(--violet-500),#5A4FD1);}
+.stat-card.c3{background:linear-gradient(135deg,var(--mint-400),var(--teal-700));}
+.stat-card.c4{background:linear-gradient(135deg,var(--coral-500),#C93650);}
+.stat-card.c5{background:linear-gradient(135deg,var(--amber-500),#D9821A);}
+.stat-card .lbl{font-size:12px;font-weight:700;opacity:.9;text-transform:uppercase;letter-spacing:.04em;}
+.stat-card .val{font-size:25px;font-weight:800;margin-top:10px;letter-spacing:-.02em;}
+.stat-card .sub{font-size:11.5px;margin-top:7px;opacity:.85;font-weight:600;}
+.stat-card .icon{position:absolute;right:18px;top:18px;font-size:21px;opacity:.9;}
+
+/* ---------- MONTH PILLS ---------- */
+.month-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.month-pill{
+  padding:8px 15px;border-radius:12px;font-size:12.5px;font-weight:800;border:1.6px solid var(--border);
+  background:#fff;color:var(--ink-soft);cursor:pointer;transition:.15s ease;
+}
+.month-pill:hover{border-color:var(--mint-400);color:var(--teal-800);}
+.month-pill.active{background:linear-gradient(135deg,var(--teal-600),var(--teal-900));color:#fff;border-color:transparent;}
+.month-pill .cnt{margin-left:6px;font-size:10.5px;padding:1px 6px;border-radius:999px;background:rgba(0,0,0,.08);}
+.month-pill.active .cnt{background:rgba(255,255,255,.25);}
+.month-pill.add{border-style:dashed;background:transparent;color:var(--ink-faint);}
+.month-pill.add:hover{color:var(--teal-800);background:#fff;}
+.month-pill{position:relative;padding-right:26px;}
+.month-pill.add{padding-right:14px;}
+.month-pill-del{
+  position:absolute;top:50%;right:7px;transform:translateY(-50%);
+  width:16px;height:16px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;line-height:1;color:inherit;opacity:.55;
+}
+.month-pill-del:hover{opacity:1;background:var(--coral-500);color:#fff;}
+
+/* ---------- PANEL ---------- */
+.panel{
+  background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-card);
+  padding:22px;margin-bottom:22px;border:1px solid var(--border);
+}
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--bg);border:1.6px solid var(--border);border-radius:12px;padding:8px 14px;flex:1 1 220px;min-width:200px;}
+.search-box input{border:none;outline:none;background:transparent;font-size:13.5px;width:100%;color:var(--ink);}
+select{
+  padding:9px 12px;border-radius:11px;border:1.6px solid var(--border);background:#fff;color:var(--ink);
+  font-size:13px;font-weight:600;cursor:pointer;
+}
+
+/* ---------- TABLE ---------- */
+.table-wrap{overflow-x:auto;overflow-y:auto;max-height:70vh;border-radius:16px;border:1px solid var(--border);}
+table{border-collapse:collapse;width:100%;min-width:1140px;font-size:13px;}
+#clientsTable{min-width:1780px;}
+thead th{
+  background:var(--mint-100);color:var(--teal-900);text-align:left;padding:11px 12px;
+  font-size:11px;text-transform:uppercase;letter-spacing:.03em;font-weight:800;
+  position:sticky;top:0;z-index:2;white-space:nowrap;border-bottom:1px solid var(--border);
+  cursor:pointer;user-select:none;
+}
+thead th:hover{color:var(--teal-600);}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tbody tr:hover{background:#F6FDFC;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr.row-closed{opacity:.55;}
+.client-name{font-weight:800;color:var(--ink);}
+.client-sub{font-size:11.5px;color:var(--ink-soft);margin-top:1px;font-weight:600;}
+.amt-paid{color:var(--teal-700);font-weight:800;}
+.amt-due{color:var(--coral-500);font-weight:800;}
+
+.chip{padding:5px 10px;border-radius:20px;font-size:11px;font-weight:800;border:none;display:inline-block;white-space:nowrap;}
+.chip-paid{background:var(--mint-100);color:var(--teal-700);}
+.chip-unpaid{background:var(--coral-100);color:var(--coral-500);}
+.chip-adv{background:var(--amber-100);color:#8a5c0a;}
+.chip-active{background:var(--mint-100);color:var(--teal-700);}
+.chip-closed{background:#EEF2F1;color:var(--ink-faint);}
+
+.icon-btn{
+  border:none;background:var(--bg);width:30px;height:30px;border-radius:9px;font-size:14px;
+  display:inline-flex;align-items:center;justify-content:center;color:var(--teal-800);flex:0 0 auto;
+}
+.icon-btn:hover{background:var(--mint-100);}
+.icon-btn.del:hover{background:var(--coral-100);color:var(--coral-500);}
+.row-actions{display:flex;gap:5px;flex-wrap:nowrap;}
+
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--teal-600);cursor:pointer;}
+
+/* ---------- EMPTY STATE ---------- */
+.empty{text-align:center;padding:50px 20px;color:var(--ink-soft);}
+.empty .em-ic{font-size:40px;margin-bottom:10px;}
+.empty h4{font-size:15px;color:var(--ink);margin-bottom:6px;}
+.empty p{font-size:13px;}
+
+/* ---------- FORMS / MODAL ---------- */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(10,40,37,.45);backdrop-filter:blur(2px);
+  display:none;align-items:center;justify-content:center;z-index:100;padding:20px;
+}
+.modal-bg.show{display:flex;}
+.modal{
+  background:#fff;border-radius:22px;padding:26px;max-width:480px;width:100%;
+  box-shadow:var(--shadow-pop);max-height:88vh;overflow-y:auto;
+}
+.modal-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.modal h3{font-size:18px;margin-bottom:0;}
+.section-divider{
+  grid-column:1/-1;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
+  color:var(--violet-500);border-top:1.5px dashed var(--border);padding-top:14px;margin-top:2px;
+}
+.form-row{margin-bottom:13px;}
+.form-row label{display:block;font-size:12px;font-weight:800;color:var(--teal-800);margin-bottom:5px;text-transform:uppercase;letter-spacing:.03em;}
+.form-row input,.form-row select,.form-row textarea{
+  width:100%;padding:10px 12px;border-radius:11px;border:1.6px solid var(--border);font-size:14px;background:var(--bg);
+  color:var(--ink);outline:none;transition:.15s ease;
+}
+.form-row textarea{resize:vertical;min-height:60px;font-family:inherit;}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:var(--mint-400);background:#fff;}
+.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-grid2 .full{grid-column:1/-1;}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;}
+.helper-text{font-size:11.5px;color:var(--ink-soft);margin-top:-6px;margin-bottom:4px;grid-column:1/-1;line-height:1.5;}
+.calc-row{display:flex;align-items:flex-end;gap:10px;grid-column:1/-1;}
+.calc-row .form-row{flex:1;margin-bottom:0;}
+.btn-calc{
+  border:1.5px dashed var(--violet-500);background:var(--violet-100);color:#5A4FD1;
+  border-radius:11px;padding:10px 14px;font-weight:800;font-size:12.5px;white-space:nowrap;
+  transition:.15s ease;
+}
+.btn-calc:hover{background:var(--violet-500);color:#fff;border-style:solid;}
+
+/* profile summary chips (reused history-style) */
+.hist-summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.hist-chip{background:var(--mint-100);color:var(--teal-800);border-radius:12px;padding:9px 12px;font-size:11.5px;font-weight:800;flex:1;min-width:118px;}
+.hist-chip .n{font-size:15px;font-weight:800;display:block;margin-top:2px;color:var(--teal-900);}
+.hist-section-title{font-size:13px;font-weight:800;color:var(--teal-800);margin:18px 0 8px;}
+.hist-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;}
+.hist-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:9px 11px;font-size:12.5px;}
+.hist-row .hmain b{display:block;font-size:12.5px;color:var(--ink);font-weight:700;}
+.hist-row .hmain span{color:var(--ink-soft);font-size:11px;font-weight:600;}
+.hist-row .hamt{font-weight:800;color:var(--teal-800);white-space:nowrap;}
+.hist-empty{color:var(--ink-soft);font-size:12.5px;padding:14px 4px;text-align:center;}
+
+/* ---------- TOAST ---------- */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--teal-900);color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:700;
+  box-shadow:var(--shadow-pop);opacity:0;pointer-events:none;transition:all .25s ease;z-index:200;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.err{background:var(--coral-500);}
+.toast.ok{background:var(--teal-600);}
+
+footer.appfoot{margin-top:30px;text-align:center;color:var(--ink-faint);font-size:11.5px;font-weight:600;}
+
+/* ---------- EXTRA COLOURFUL BUTTON VARIANTS ---------- */
+.btn-amber{background:linear-gradient(135deg,var(--amber-500),#D9821A);color:#fff;box-shadow:0 10px 22px -8px rgba(242,169,59,.55);}
+.btn-amber:hover{box-shadow:0 14px 26px -8px rgba(242,169,59,.65);}
+.btn-violet{background:linear-gradient(135deg,var(--violet-500),#5A4FD1);color:#fff;box-shadow:0 10px 22px -8px rgba(124,111,239,.55);}
+.btn-violet:hover{box-shadow:0 14px 26px -8px rgba(124,111,239,.65);}
+.btn-coral{background:linear-gradient(135deg,#FF8A8A,var(--coral-500));color:#fff;box-shadow:0 10px 22px -8px rgba(240,87,106,.5);}
+
+/* ---------- SERIAL / INLINE-EDIT TABLE CELLS ---------- */
+.serial-badge{
+  display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;padding:0 6px;
+  border-radius:9px;background:var(--mint-100);color:var(--teal-800);font-weight:800;font-size:12px;
+}
+.cell-input{
+  width:100%;min-width:88px;padding:7px 9px;border-radius:9px;border:1.5px solid transparent;background:transparent;
+  font-size:12.5px;font-weight:700;color:var(--ink);outline:none;transition:.15s ease;
+}
+.cell-input:hover{border-color:var(--border);background:var(--bg);}
+.cell-input:focus{border-color:var(--mint-400);background:#fff;}
+.cell-input.num{width:92px;}
+.cell-input.date{width:106px;font-size:11.3px;padding:6px 7px;}
+.cell-select{
+  padding:7px 8px;border-radius:9px;border:1.5px solid transparent;background:transparent;font-size:12.5px;
+  font-weight:700;color:var(--ink);cursor:pointer;
+}
+.cell-select:hover{border-color:var(--border);background:var(--bg);}
+.per-day-pill{
+  display:inline-block;background:var(--violet-100);color:#5A4FD1;font-weight:800;font-size:11.5px;
+  padding:5px 9px;border-radius:9px;white-space:nowrap;
+}
+.chip-btn{border:none;cursor:pointer;transition:transform .12s ease, filter .12s ease;}
+.chip-btn:hover{filter:brightness(0.95);transform:translateY(-1px);}
+.chip-btn:active{transform:translateY(0);}
+.chip-closed{background:var(--amber-100);color:#8a5c0a;}
+tr.totals-row td{
+  background:var(--mint-100);font-weight:800;color:var(--teal-900);position:sticky;bottom:0;
+  border-top:2px solid var(--mint-400);
+}
+
+/* ---------- COLOURFUL ICON BUTTON VARIANTS ---------- */
+.icon-btn.ib-violet{background:var(--violet-100);color:#5A4FD1;}
+.icon-btn.ib-violet:hover{background:var(--violet-500);color:#fff;}
+.icon-btn.ib-amber{background:var(--amber-100);color:#8a5c0a;}
+.icon-btn.ib-amber:hover{background:var(--amber-500);color:#fff;}
+.icon-btn.ib-mint{background:var(--mint-100);color:var(--teal-700);}
+.icon-btn.ib-mint:hover{background:var(--mint-400);color:#063733;}
+
+/* ---------- DASHBOARD CHARTS ---------- */
+
+.backup-card{background:linear-gradient(135deg,var(--teal-900),var(--teal-700));color:#EAFBF8;border-radius:16px;padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--shadow-card);}
+.backup-card .bk-text{flex:1 1 260px;min-width:220px;}
+.backup-card h4{font-size:15px;color:#fff;margin-bottom:4px;}
+.backup-card p{font-size:12.5px;color:#BFE4DF;line-height:1.5;}
+.backup-card .bk-meta{font-size:11.5px;color:#9FCFC9;margin-top:6px;}
+.backup-card .bk-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.gd-card{background:linear-gradient(135deg,#2A2470,#5A4FD1);}
+.gd-badge{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:99px;margin-left:8px;vertical-align:middle;background:rgba(255,255,255,.18);color:#fff;}
+.gd-badge.ok{background:#1E9E6A;} .gd-badge.busy{background:#C98A1B;} .gd-badge.bad{background:#D9475A;}
+.gd-setup{margin-top:10px;font-size:12px;color:#D9D4FF;}
+.gd-setup summary{cursor:pointer;font-weight:700;color:#fff;}
+.gd-setup ol{margin:8px 0 8px 18px;padding:0;line-height:1.6;}
+.gd-setup input{width:100%;padding:9px 11px;border-radius:9px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:12.5px;margin:6px 0;}
+.gd-setup input::placeholder{color:#C9C3F5;}
+.gd-setup code{background:rgba(0,0,0,.25);padding:1px 6px;border-radius:6px;word-break:break-all;}
+.charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+@media(max-width:900px){.charts-grid{grid-template-columns:1fr;}}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 18px 14px;}
+.chart-card h4{font-size:13.5px;color:var(--teal-900);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px;}
+.bar-row:last-child{margin-bottom:0;}
+.bar-label{width:108px;flex:0 0 auto;color:var(--ink-soft);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bar-track{flex:1;height:14px;border-radius:8px;background:var(--bg);overflow:hidden;border:1px solid var(--border);}
+.bar-fill{height:100%;border-radius:8px;transition:width .3s ease;}
+.bar-value{width:56px;flex:0 0 auto;text-align:right;font-weight:800;color:var(--ink);}
+.gauge-wrap{display:flex;align-items:center;gap:18px;}
+.gauge{width:104px;height:104px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;position:relative;}
+.gauge .g-inner{width:76px;height:76px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+.gauge .g-inner b{font-size:17px;color:var(--teal-900);}
+.gauge .g-inner span{font-size:9.5px;color:var(--ink-soft);font-weight:700;}
+.gauge-note{font-size:12px;color:var(--ink-soft);font-weight:600;line-height:1.6;}
+
+/* ---------- CLIENT PROFILE CARDS ---------- */
+.profiles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:16px;}
+.profile-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px;
+  display:flex;flex-direction:column;gap:10px;transition:.15s ease;
+}
+.profile-card:hover{box-shadow:var(--shadow-card);border-color:var(--mint-400);transform:translateY(-2px);}
+.profile-top{display:flex;align-items:center;gap:12px;}
+.profile-avatar{
+  width:46px;height:46px;border-radius:14px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:16px;color:#fff;background:linear-gradient(135deg,var(--teal-600),var(--teal-900));
+}
+.profile-name{font-weight:800;font-size:14.5px;color:var(--ink);}
+.profile-sub{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-top:1px;}
+.profile-row{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);font-weight:600;}
+.profile-row b{color:var(--ink);font-weight:800;}
+.profile-chips{display:flex;gap:6px;flex-wrap:wrap;}
+.profile-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+
+@media(max-width:900px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:60;transform:translateX(-100%);transition:transform .2s ease;width:230px;flex-basis:230px;}
+  .sidebar.open{transform:translateX(0);}
+  main{padding:18px 16px 60px;}
+  .menu-toggle{display:flex;}
+  .form-grid2{grid-template-columns:1fr;}
+}
+.menu-toggle{display:none;border:none;background:#fff;border-radius:10px;width:38px;height:38px;align-items:center;justify-content:center;font-size:17px;box-shadow:var(--shadow-card);color:var(--teal-800);}
+.backdrop-mobile{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:55;}
+.backdrop-mobile.show{display:block;}
+
+/* ---------- NO CONTRACT BADGE ---------- */
+.badge-nocontract{background:var(--amber-100);color:#8a5c0a;font-size:10.5px;padding:4px 9px;border-radius:8px;font-weight:800;white-space:nowrap;}
+
+/* ---------- PROFILE MODAL HEAD ---------- */
+.profile-modal-head{
+  display:flex;align-items:center;gap:16px;padding:18px;border-radius:18px;
+  background:linear-gradient(135deg,var(--teal-900),var(--teal-700));color:#fff;position:relative;
+}
+.profile-modal-head .pm-avatar{
+  width:58px;height:58px;border-radius:16px;background:rgba(255,255,255,.16);
+  display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;flex:0 0 auto;
+}
+.profile-modal-head .pm-info h3{font-size:18px;color:#fff;}
+.profile-modal-head .pm-info p{font-size:12px;color:#BFE4DF;font-weight:600;margin-top:2px;}
+.profile-modal-head .pm-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.profile-modal-head .pm-close{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.15);border:none;color:#fff;width:30px;height:30px;border-radius:9px;font-size:14px;cursor:pointer;}
+.profile-modal-head .pm-close:hover{background:rgba(255,255,255,.3);}
+
+.pv-field{background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:9px 12px;}
+.pv-field label{display:block;font-size:10.5px;font-weight:800;color:var(--teal-800);text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px;}
+.pv-field span{font-size:13.5px;font-weight:700;color:var(--ink);}
+.pv-field.full{grid-column:1/-1;}
+
+/* ---------- FULL VIEW (cross-month) TABLE ---------- */
+.fv-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:6px;}
+.fv-table th{background:var(--mint-100);color:var(--teal-900);text-align:left;padding:8px 10px;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;font-weight:800;}
+.fv-table td{padding:8px 10px;border-bottom:1px solid var(--border);}
+.fv-table tr.fv-current td{background:var(--mint-100);}
+.fv-empty{color:var(--ink-soft);font-size:12.5px;padding:10px 2px;}
+
+/* ---------- CRM / LEADS ---------- */
+.lead-status{padding:5px 10px;border-radius:20px;font-size:10.5px;font-weight:800;border:none;white-space:nowrap;}
+.lead-status.new{background:var(--violet-100);color:#5A4FD1;}
+.lead-status.contacted{background:var(--amber-100);color:#8a5c0a;}
+.lead-status.interested{background:var(--mint-100);color:var(--teal-700);}
+.lead-status.converted{background:#EEF2F1;color:var(--ink-faint);}
+.lead-status.lost{background:var(--coral-100);color:var(--coral-500);}
+
+/* ---------- DUPLICATE FINDER ---------- */
+.dup-group{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;}
+.dup-group-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.dup-group-head b{font-size:13.5px;color:var(--teal-900);}
+.dup-group-head span{font-size:11px;color:var(--ink-soft);font-weight:600;}
+.dup-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:9px 12px;margin-bottom:6px;font-size:12.5px;}
+.dup-row:last-child{margin-bottom:0;}
+.dup-row .dr-main b{display:block;font-size:12.5px;color:var(--ink);}
+.dup-row .dr-main span{color:var(--ink-soft);font-size:11px;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">🩺</div>
+      <div class="brand-text">
+        <h1>Doctors Home Care Ltd.</h1>
+        <span>Client &amp; Payment Manager</span>
+      </div>
+    </div>
+    <nav id="navMenu">
+      <button class="nav-btn active" data-view="dashboard"><span class="ic">📊</span> Dashboard</button>
+      <button class="nav-btn" data-view="clients"><span class="ic">💳</span> Payment List</button>
+      <button class="nav-btn" data-view="profiles"><span class="ic">🗂️</span> Client Profiles</button>
+      <button class="nav-btn" data-view="crm"><span class="ic">🎯</span> CRM / Leads</button>
+      <button class="nav-btn" data-view="duplicates"><span class="ic">🧬</span> Duplicate Finder</button>
+      <button class="nav-btn" data-view="trash"><span class="ic">🗑️</span> Deleted &amp; Restore</button>
+    </nav>
+    <div class="sidebar-foot">
+      100% offline · data is auto-saved on this device after every change.<br>Use <b>Full App Backup</b> on the Dashboard (or <b>Export All (Excel)</b>) for a backup file you can keep or move to another device.
+    </div>
+  </aside>
+  <div class="backdrop-mobile" id="backdropMobile"></div>
+
+  <main>
+    <div class="topbar">
+      <div class="topbar-title">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <div>
+          <h2 id="pageTitle">Client Dashboard</h2>
+          <p class="sub" id="pageSub">Track months, bills, payments and advances for every client</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-amber" id="btnBackup">💾 Export All (Excel)</button>
+        <button class="btn btn-violet" id="btnRestore">📂 Import All (Excel)</button>
+        <input type="file" id="fileImportInput" accept=".xlsx,.xls" style="display:none;">
+        <button class="btn btn-mint" id="btnAddClient">➕ Add Client</button>
+      </div>
+    </div>
+
+    <div class="month-pills" id="monthRow"></div>
+
+    <div class="grid-stats" id="statsRow"></div>
+
+    <!-- ================= DASHBOARD (analytics only, no client list) ================= -->
+    <div class="panel" id="dashboardPanel">
+      <div class="backup-card">
+        <div class="bk-text">
+          <h4>🛡️ Full App Backup</h4>
+          <p>Saves <b>everything</b> in one file: all months &amp; clients, payments, histories, CRM leads and the Deleted &amp; Restore bin. Works offline — restore it on any device.</p>
+          <div class="bk-meta" id="backupSummary"></div>
+        </div>
+        <div class="bk-actions">
+          <button class="btn btn-amber" id="btnFullBackup">⬇️ Download Full Backup</button>
+          <button class="btn btn-violet" id="btnFullRestore">⬆️ Restore Full Backup</button>
+          <input type="file" id="fullRestoreInput" accept=".json,application/json" style="display:none;">
+        </div>
+      </div>
+      <div class="backup-card gd-card">
+        <div class="bk-text">
+          <h4>☁️ Google Drive Auto-Sync <span class="gd-badge" id="gdBadge">Not connected</span></h4>
+          <p>Sign in with Google and every edit is saved to your Drive automatically. Open the app on any phone or computer, sign in, and the same data loads.</p>
+          <div class="bk-meta" id="gdStatus"></div>
+          <details class="gd-setup" id="gdSetup">
+            <summary>⚙️ One-time setup</summary>
+            <ol>
+              <li>Host this file at an https web address (e.g. Netlify Drop / GitHub Pages) and open it from there.</li>
+              <li>In Google Cloud Console create an <b>OAuth Client ID</b> (type: Web application), enable the <b>Google Drive API</b>, and add <code id="gdOrigin"></code> under <b>Authorized JavaScript origins</b>.</li>
+              <li>Paste the Client ID below and press Save.</li>
+            </ol>
+            <input type="text" id="gdClientIdInput" placeholder="xxxxxxxx.apps.googleusercontent.com" autocomplete="off">
+            <button class="btn btn-mint btn-sm" id="btnGdSaveId">Save Client ID</button>
+          </details>
+        </div>
+        <div class="bk-actions">
+          <button class="btn btn-mint" id="btnGdConnect">🔗 Connect Google Drive</button>
+          <button class="btn btn-amber" id="btnGdSync" style="display:none;">🔄 Sync now</button>
+          <button class="btn btn-ghost" id="btnGdDisconnect" style="display:none;">Disconnect</button>
+        </div>
+      </div>
+      <div class="charts-grid" id="chartsGrid"></div>
+    </div>
+
+    <!-- ================= PAYMENT LIST (fully editable master table) ================= -->
+    <div class="panel" id="clientsPanel" style="display:none;">
+      <div class="toolbar" id="clientToolbar">
+        <div class="search-box">
+          <span>🔍</span>
+          <input type="text" id="searchInput" placeholder="Search by name, phone or location…">
+        </div>
+        <select id="filterStatus">
+          <option value="all">All statuses</option>
+          <option value="active">Active only</option>
+          <option value="closed">Closed only</option>
+          <option value="unpaid">Unpaid / partial</option>
+          <option value="paid">Fully paid</option>
+        </select>
+        <span id="paymentOnlyControls" style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-mint btn-sm" id="btnAddClientInline">➕ Add Client</button>
+          <button class="btn btn-coral btn-sm" id="btnMarkPaid" disabled>✅ Mark Paid</button>
+          <button class="btn btn-ghost" id="btnExportCsv">⬇️ Export Data (Excel)</button>
+          <button class="btn btn-ghost" id="btnImportCsv">⬆️ Import Data (Excel)</button>
+          <input type="file" id="csvImportInput" accept=".xlsx,.xls" style="display:none;">
+          <button class="btn btn-ghost" id="btnOpenTrash">🗑️ Deleted &amp; Restore</button>
+          <select id="copyTargetSelect" title="Copy selected clients to…"></select>
+          <button class="btn btn-primary" id="btnCopySelected" disabled>Copy Selected →</button>
+        </span>
+      </div>
+      <div class="table-wrap">
+        <table id="clientsTable">
+          <thead>
+            <tr>
+              <th style="width:38px;">#</th>
+              <th style="width:30px;"><input type="checkbox" id="selectAll"></th>
+              <th data-sort="name">Client Name</th>
+              <th data-sort="location">Location</th>
+              <th data-sort="shift">Duty / Shift</th>
+              <th>Start Date 📅</th>
+              <th>End Date 📅</th>
+              <th data-sort="rate">Contract (৳/mo)</th>
+              <th data-sort="days">Total Duty (days)</th>
+              <th>Per Day (৳)</th>
+              <th data-sort="bill">Total Bill (৳)</th>
+              <th data-sort="paid">Paid (৳)</th>
+              <th data-sort="due">Total Due (৳)</th>
+              <th data-sort="status">Payment</th>
+              <th data-sort="service">Service</th>
+              <th style="width:120px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clientsBody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="emptyState" style="display:none;">
+        <div class="em-ic">🗂️</div>
+        <h4>No clients here yet</h4>
+        <p>Add a client, or copy one over from another month.</p>
+      </div>
+      <div id="totalsNote" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);font-weight:600;"></div>
+    </div>
+
+    <!-- ================= CLIENT PROFILES (browsable directory) ================= -->
+    <div class="panel" id="profilesPanel" style="display:none;">
+      <div class="profile-toolbar">
+        <div class="search-box">
+          <span>🔍</span>
+          <input type="text" id="profileSearchInput" placeholder="Search by name, phone or location…">
+        </div>
+        <select id="profileFilterStatus">
+          <option value="all">All statuses</option>
+          <option value="active">Active only</option>
+          <option value="closed">Closed only</option>
+          <option value="unpaid">Unpaid / partial</option>
+          <option value="paid">Fully paid</option>
+        </select>
+      </div>
+      <div class="profiles-grid" id="profilesGrid"></div>
+      <div class="empty" id="profilesEmpty" style="display:none;">
+        <div class="em-ic">🗂️</div>
+        <h4>No client profiles here yet</h4>
+        <p>Add a client to build out this month's profile directory.</p>
+      </div>
+    </div>
+
+    <!-- ================= CRM / LEADS ================= -->
+    <div class="panel" id="crmPanel" style="display:none;">
+      <div class="toolbar">
+        <div class="search-box">
+          <span>🔍</span>
+          <input type="text" id="leadSearchInput" placeholder="Search leads by name, phone or source…">
+        </div>
+        <select id="leadFilterStatus">
+          <option value="all">All statuses</option>
+          <option value="New">New</option>
+          <option value="Contacted">Contacted</option>
+          <option value="Interested">Interested</option>
+          <option value="Converted">Converted</option>
+          <option value="Lost">Lost</option>
+        </select>
+        <button class="btn btn-mint btn-sm" id="btnAddLead">➕ Add Lead</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:38px;">#</th>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Location</th>
+              <th>Source</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th style="width:190px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leadsBody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="leadsEmpty" style="display:none;">
+        <div class="em-ic">🎯</div>
+        <h4>No leads yet</h4>
+        <p>Add a lead — once they're ready, convert them straight into the Client &amp; Payment List.</p>
+      </div>
+    </div>
+
+    <!-- ================= DUPLICATE FINDER ================= -->
+    <div class="panel" id="duplicatesPanel" style="display:none;">
+      <p style="color:var(--ink-soft);font-size:13px;font-weight:600;margin-bottom:16px;">
+        Scans every month for clients that share the same phone number (or the same name when no phone is set) — handy for catching accidental double-entries.
+      </p>
+      <div id="duplicatesList"></div>
+      <div class="empty" id="duplicatesEmpty" style="display:none;">
+        <div class="em-ic">✅</div>
+        <h4>No duplicates found</h4>
+        <p>Every client across every month looks unique.</p>
+      </div>
+    </div>
+
+    <!-- ================= DELETED & RESTORE DATA (recycle bin) ================= -->
+    <div class="panel" id="trashPanel" style="display:none;">
+      <div class="toolbar" style="margin-bottom:16px;">
+        <p style="color:var(--ink-soft);font-size:13px;font-weight:600;margin:0;flex:1;min-width:220px;">
+          Deleted clients and whole deleted months land here first — restore them any time, or erase them for good.
+        </p>
+        <button class="btn btn-ghost btn-sm" id="btnRestoreLast" disabled>↩️ Restore Last Deleted</button>
+        <button class="btn btn-coral btn-sm" id="btnEmptyTrash">🗑️ Permanently Delete All</button>
+      </div>
+      <div id="trashList"></div>
+      <div class="empty" id="trashEmpty" style="display:none;">
+        <div class="em-ic">🗑️</div>
+        <h4>Nothing deleted</h4>
+        <p>Deleted clients and months will show up here so you can restore or permanently remove them.</p>
+      </div>
+    </div>
+
+    <footer class="appfoot">Doctors Home Care Limited — Offline Client &amp; Payment Manager</footer>
+  </main>
+</div>
+
+<!-- Add / Edit Client Modal -->
+<div class="modal-bg" id="clientModalBackdrop">
+  <div class="modal" style="max-width:620px;">
+    <div class="modal-title-row">
+      <h3 id="clientModalTitle">Add Client</h3>
+      <button class="icon-btn" onclick="closeModal('clientModalBackdrop')">✕</button>
+    </div>
+    <div class="form-grid2">
+      <div class="form-row full">
+        <label>Client / Patient Name</label>
+        <input type="text" id="f_name" placeholder="e.g. Mrs. Nasrin Akter">
+      </div>
+      <div class="form-row">
+        <label>Phone Number</label>
+        <input type="text" id="f_phone" placeholder="+880 1XXX-XXXXXX">
+      </div>
+      <div class="form-row">
+        <label>Location / Area</label>
+        <input type="text" id="f_location" placeholder="e.g. Dhanmondi">
+      </div>
+      <div class="form-row">
+        <label>Shift Duration</label>
+        <select id="f_shift">
+          <option value="8">8 hours</option>
+          <option value="12">12 hours</option>
+          <option value="24">24 hours</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Service Type / Duty</label>
+        <select id="f_type">
+          <option value="Caregiver">Caregiver</option>
+          <option value="Nurse">Nurse</option>
+          <option value="Attendant">Attendant</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Start Date</label>
+        <input type="date" id="f_start">
+      </div>
+      <div class="form-row">
+        <label>End Date</label>
+        <input type="date" id="f_end">
+      </div>
+
+      <div class="section-divider">Contract &amp; Day-wise Billing</div>
+      <div class="form-row">
+        <label>Monthly Contract Rate (৳)</label>
+        <input type="number" id="f_rate" min="0" step="1" placeholder="e.g. 30000" oninput="updateBillPreview()">
+      </div>
+      <div class="form-row">
+        <label>Days of Service This Month</label>
+        <input type="number" id="f_days" min="0" step="1" placeholder="Leave blank = full month" oninput="updateBillPreview()">
+      </div>
+      <div class="form-row full" style="background:var(--mint-100);border-radius:12px;padding:12px 14px;margin-bottom:6px;">
+        <label style="margin-bottom:2px;">Total Bill Amount (auto-calculated)</label>
+        <div id="f_billPreview" style="font-size:21px;font-weight:800;color:var(--teal-900);">৳0</div>
+      </div>
+      <p class="helper-text">Total Bill is always calculated as Contract Rate ÷ days-in-month × Days of Service — enter the Monthly Contract Rate first. Without a contract rate, the bill stays ৳0 and cannot be typed in manually.</p>
+
+      <div class="section-divider">Payments</div>
+      <div class="form-row">
+        <label>Paid So Far (৳)</label>
+        <input type="number" id="f_paid" min="0" step="1" placeholder="0">
+      </div>
+      <div class="form-row">
+        <label>Advance Given / Held (৳)</label>
+        <input type="number" id="f_advance" min="0" step="1" placeholder="0">
+      </div>
+      <div class="form-row full">
+        <label>Notes</label>
+        <textarea id="f_notes" placeholder="Any extra detail about this client…"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('clientModalBackdrop')">Cancel</button>
+      <button class="btn btn-primary" id="btnSaveClient">Save Client</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Client Profile Modal -->
+<div class="modal-bg" id="historyModalBackdrop">
+  <div class="modal profile-modal" style="max-width:680px;">
+    <div class="profile-modal-head" id="profileModalHead"></div>
+    <div class="modal-title-row" style="margin-top:16px;">
+      <h4 style="font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--teal-800);">Client Details</h4>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" id="btnProfileEdit" onclick="startProfileEdit()">✏️ Edit</button>
+        <button class="btn btn-mint btn-sm" id="btnProfileSave" style="display:none;" onclick="saveProfileEdit()">💾 Save</button>
+        <button class="btn btn-ghost btn-sm" id="btnProfileCancel" style="display:none;" onclick="cancelProfileEdit()">Cancel</button>
+      </div>
+    </div>
+    <div class="form-grid2" id="profileViewFields" style="margin-bottom:6px;"></div>
+    <div class="form-grid2" id="profileEditFields" style="margin-bottom:6px;display:none;"></div>
+    <div class="hist-summary" id="profileSummary"></div>
+
+    <div class="hist-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>📅 Full View — Payment Across Months</span>
+    </div>
+    <div id="fullViewInline"></div>
+
+    <div class="hist-section-title">Activity Timeline — full service history</div>
+    <div class="hist-list" id="historyTimeline"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeProfileModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Month Modal -->
+<div class="modal-bg" id="monthModalBackdrop">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-title-row">
+      <h3>Add a New Month</h3>
+      <button class="icon-btn" onclick="closeModal('monthModalBackdrop')">✕</button>
+    </div>
+    <div class="form-row">
+      <label>Month</label>
+      <select id="m_month">
+        <option>January</option><option>February</option><option>March</option><option>April</option>
+        <option>May</option><option>June</option><option>July</option><option>August</option>
+        <option>September</option><option>October</option><option>November</option><option>December</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Year</label>
+      <input type="number" id="m_year" value="2026">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('monthModalBackdrop')">Cancel</button>
+      <button class="btn btn-primary" id="btnSaveMonth">Add Month</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Lead Modal -->
+<div class="modal-bg" id="leadModalBackdrop">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-title-row">
+      <h3 id="leadModalTitle">Add Lead</h3>
+      <button class="icon-btn" onclick="closeModal('leadModalBackdrop')">✕</button>
+    </div>
+    <div class="form-row">
+      <label>Name</label>
+      <input type="text" id="l_name" placeholder="e.g. Mr. Rahim Uddin">
+    </div>
+    <div class="form-row">
+      <label>Phone</label>
+      <input type="text" id="l_phone" placeholder="+880 1XXX-XXXXXX">
+    </div>
+    <div class="form-row">
+      <label>Location / Area</label>
+      <input type="text" id="l_location" placeholder="e.g. Dhanmondi">
+    </div>
+    <div class="form-row">
+      <label>Source</label>
+      <select id="l_source">
+        <option>Referral</option><option>Facebook</option><option>Website</option>
+        <option>Phone Call</option><option>Walk-in</option><option>Other</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Status</label>
+      <select id="l_status">
+        <option>New</option><option>Contacted</option><option>Interested</option><option>Lost</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Notes</label>
+      <textarea id="l_notes" placeholder="Any extra detail about this lead…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('leadModalBackdrop')">Cancel</button>
+      <button class="btn btn-primary" id="btnSaveLead">Save Lead</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Custom Confirm Modal (used instead of window.confirm, which can fail in some app/webview wrappers) -->
+<div class="modal-bg" id="confirmModalBackdrop">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-title-row">
+      <h3 id="confirmModalTitle">Please confirm</h3>
+      <button class="icon-btn" onclick="closeConfirmModal(false)">✕</button>
+    </div>
+    <p id="confirmModalMessage" style="font-size:13.5px;color:var(--ink-soft);line-height:1.6;"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="confirmModalCancel">Cancel</button>
+      <button class="btn btn-danger" id="confirmModalOk">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   DOCTORS HOME CARE LIMITED — OFFLINE CLIENT & PAYMENT MANAGER
+   All data lives in-memory for this session. Use Save Backup /
+   Load Backup to persist between sessions (works fully offline,
+   no server, no account needed).
+   ========================================================= */
+
+const AUGUST_DATA = [{"name":"Nipa","phone":"1720087596","location":"Dhanmondi","shift":"24","type":"Caregiver","startDate":"2026-08-01","endDate":"2026-08-30","bill":22000,"paid":0,"status":"active"},{"name":"Moe","phone":"1 (813) 7241490","location":"Gazipur","shift":"24","type":"Nurse","startDate":"2026-08-01","endDate":"2026-08-30","bill":30000,"paid":0,"status":"active"},{"name":"Pankaj","phone":"1712681296","location":"Bosila","shift":"12","type":"Nurse","startDate":"2026-08-01","endDate":"2026-08-30","bill":27000,"paid":0,"status":"active"},{"name":"Javad Iqbal Khan","phone":"1686197939","location":"Ramna","shift":"24","type":"Caregiver","startDate":"2026-08-01","endDate":"2026-08-30","bill":22000,"paid":0,"status":"active"},{"name":"Dr. Fatema","phone":"+61 435 290 680","location":"Dhanmondi","shift":"12","type":"Nurse","startDate":"2026-08-01","endDate":"2026-08-30","bill":25200,"paid":0,"status":"active"},{"name":"ART Deco","phone":"+880 1707-231783","location":"Mohammadpur","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":25000,"paid":0,"status":"active"},{"name":"Asha Haque","phone":"","location":"Baridhara","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":24000,"paid":0,"status":"active"},{"name":"Bablu Roy","phone":"+880 1819-133947","location":"Uttara","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":24000,"paid":0,"status":"active"},{"name":"Tanvir Ahammed","phone":"+1 (647) 880-7904","location":"Gulshan","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":27000,"paid":0,"status":"active"},{"name":"Labiba Fairooz","phone":"+880 1313-733110","location":"Uttara","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":20800,"paid":0,"status":"active"},{"name":"Kazi Ataul","phone":"+880 1643-421308","location":"Badda","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":22000,"paid":0,"status":"active"},{"name":"Abul Kalam","phone":"+880 1713-005821","location":"Shantinagar","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":24000,"paid":0,"status":"active"},{"name":"Tanzila Aziz","phone":"+880 1715-022222","location":"Dhanmondi","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":35000,"paid":0,"status":"active"},{"name":"Trisha","phone":"+880 1973-037485","location":"Gulshan","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":60000,"paid":0,"status":"active"},{"name":"Tamanna","phone":"+880 1734-549735","location":"Mirpur","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":24000,"paid":0,"status":"active"},{"name":"H.R Shovan","phone":"+880 1716-192388","location":"Narayanganj","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":30000,"paid":0,"status":"active"},{"name":"Tanvir Aloam (PC)","phone":"+880 1713-028105","location":"Shamoli","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":35000,"paid":0,"status":"active"},{"name":"Shayla","phone":"+880 1715-180253","location":"Mogbazar","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":75000,"paid":0,"status":"active"},{"name":"Toma Afrreen","phone":"+61 430 299 198","location":"Mirpur","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":39900,"paid":0,"status":"active"},{"name":"Anindita Ghosh","phone":"+880 1736-015206","location":"Narsingdi","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":34000,"paid":0,"status":"active"},{"name":"Afroza","phone":"+1 (646) 733-6511","location":"Lalmatia","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":30000,"paid":0,"status":"active"},{"name":"Sarwar","phone":"+880 1712-805482","location":"Cumilla","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":32000,"paid":0,"status":"active"},{"name":"Samia Haque","phone":"+880 1715-627701","location":"Shamoli","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":24000,"paid":0,"status":"active"},{"name":"Farah","phone":"+880 1711-875445","location":"Dhanmondi","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":21600,"paid":0,"status":"active"},{"name":"Miss Alomed","phone":"+880 1847-129252","location":"Uttara","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":24000,"paid":0,"status":"active"},{"name":"Mahmud","phone":"+880 1819-617321","location":"SEO-11","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":25000,"paid":0,"status":"active"},{"name":"Nikatan-Delower","phone":"+880 1819-178441","location":"Road-8","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":33000,"paid":0,"status":"active"},{"name":"Nondita","phone":"+880 1712-917423","location":"Uttara","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":46000,"paid":0,"status":"active"},{"name":"Mokit","phone":"+880 1712-271515","location":"Shahbag","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":27000,"paid":0,"status":"active"},{"name":"Saikat","phone":"1704169338","location":"CRP","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":30000,"paid":0,"status":"active"},{"name":"Quazi Imshad","phone":"+880 1711-198112","location":"Uttara","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":24000,"paid":0,"status":"active"},{"name":"Nushat","phone":"","location":"Mirpur-1","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":19200,"paid":0,"status":"active"},{"name":"AddI SEO","phone":"+880 1332-548361","location":"SEO-13","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":15000,"paid":0,"status":"active"},{"name":"Dr Ferdous Ara","phone":"+880 1812-294258","location":"Mirpur-1","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":24000,"paid":0,"status":"active"},{"name":"HM Emran","phone":"","location":"Mograpara","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":27000,"paid":0,"status":"active"},{"name":"Magbazar Better Client","phone":"+880 1717-985563","location":"Mogbazar","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":30000,"paid":0,"status":"active"},{"name":"Atiya Mam","phone":"+880 1711-619853","location":"Uttara","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":48000,"paid":0,"status":"active"},{"name":"Raziul Sir","phone":"+880 1708-484249","location":"Uttara Sector 3","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":26000,"paid":0,"status":"active"},{"name":"Tamanna Choudory","phone":"+880 1734-549735","location":"Mirpur","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":24000,"paid":0,"status":"active"},{"name":"Azizul Sir","phone":"+880 1688-016312","location":"Uttara","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":164300,"paid":0,"status":"active"},{"name":"Binoy","phone":"+880 1717-114944","location":"Gulshan","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":64000,"paid":0,"status":"active"},{"name":"Kaniz Azad","phone":"+880 1625-404823","location":"Uttara 12","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":33000,"paid":0,"status":"closed"},{"name":"Firoza Begum","phone":"+880 1533-321622","location":"Uttara","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":24800,"paid":0,"status":"active"},{"name":"Mamun Dokkinkhan","phone":"","location":"Dokkinkhan","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":25500,"paid":0,"status":"active"},{"name":"Mehedi Hasan","phone":"","location":"Gazipur","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":27000,"paid":0,"status":"active"},{"name":"Tania","phone":"+880 1938-261259","location":"Uttara 01","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":24000,"paid":0,"status":"active"},{"name":"Rashedul Islam","phone":"+880 1818-161382","location":"Malibag","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":30000,"paid":0,"status":"active"},{"name":"Shantanu Haque","phone":"+880 1521-428781","location":"Malibag","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":24000,"paid":0,"status":"active"},{"name":"Novana Noor","phone":"+880 1817-180035","location":"Kafrul","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":48000,"paid":0,"status":"active"},{"name":"Minu Hamid","phone":"+880 1755-556788","location":"Gulistan","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":27000,"paid":0,"status":"active"},{"name":"Dr Murshida","phone":"+880 1913-486049","location":"Azimpur","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":27000,"paid":0,"status":"active"},{"name":"Aysha  Mamun","phone":"+351 912 534 111","location":"Bashundhara","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":28000,"paid":0,"status":"active"},{"name":"Alim","phone":"+1 (403) 714-0695","location":"Mogbazar","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":30000,"paid":0,"status":"active"},{"name":"Rumky Islam","phone":"+61 450 146 330","location":"Greenroad","shift":"8","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":13300,"paid":0,"status":"active"},{"name":"HS Mithun","phone":"+880 1716-670374","location":"Badda","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":16100,"paid":0,"status":"active"},{"name":"Rakib","phone":"+880 1882-541500","location":"Badda","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":14000,"paid":0,"status":"active"},{"name":"Samun Nasir","phone":"+880 1717-758594","location":"Uttara 4","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":10000,"paid":0,"status":"active"},{"name":"Fatema Chowdhury","phone":"+61 435 290 680","location":"Baridhara","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":24000,"paid":0,"status":"active"},{"name":"Farhad","phone":"+880 1745-699669","location":"Uttarkhan Baby Care","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":25000,"paid":0,"status":"active"},{"name":"Sharif Mohammad","phone":"+880 1340-431208","location":"Mohammadpur","shift":"24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":26000,"paid":0,"status":"active"},{"name":"Shakhawat Hossain","phone":"+880 1711-167392","location":"Uttara 12","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":10400,"paid":0,"status":"active"},{"name":"Shaikat","phone":"+1 (505) 430-0825","location":"Aftab Nogor","shift":"12,24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":20000,"paid":0,"status":"active"},{"name":"Debasish","phone":"+61 418 722 816","location":"Faridpur","shift":"24,24","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":29000,"paid":0,"status":"active"},{"name":"Adv Al Mahmud Khan","phone":"+880 1719-828560","location":"Basabo","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":5000,"paid":0,"status":"active"},{"name":"Mmirza","phone":"+880 1713-456688","location":"Dhanmondi","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":0,"paid":0,"status":"active"},{"name":"Salman Rahman Ovi","phone":"+880 1675-254203","location":"Rampura","shift":"12","type":"","startDate":"2026-08-01","endDate":"2026-08-30","bill":0,"paid":0,"status":"active"}]
+;
+
+let uidCounter = 1;
+function uid(){ return 'c' + (uidCounter++) + '_' + Math.random().toString(36).slice(2,8); }
+
+/* ---------------- recycle bin (deleted clients & months) ---------------- */
+const TRASH_LIMIT = 300;
+function pushTrash(entry){
+  entry.id = 't' + (uidCounter++) + '_' + Math.random().toString(36).slice(2,8);
+  entry.deletedAt = todayISO();
+  STORE.trash.unshift(entry);
+  if(STORE.trash.length > TRASH_LIMIT) STORE.trash.length = TRASH_LIMIT;
+}
+
+function fmtMoney(n){
+  n = Number(n)||0;
+  return '৳' + n.toLocaleString('en-US');
+}
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(iso){
+  if(!iso) return '—';
+  const d = new Date(iso+'T00:00:00');
+  if(isNaN(d)) return iso;
+  return d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+}
+function fmtDateShort(iso){
+  if(!iso) return '—';
+  const d = new Date(iso+'T00:00:00');
+  if(isNaN(d)) return iso;
+  return d.toLocaleDateString('en-GB', {day:'2-digit', month:'short'});
+}
+function makeClient(base){
+  const now = todayISO();
+  const c = Object.assign({
+    id: uid(),
+    name:'', phone:'', location:'', shift:'12', type:'Caregiver',
+    startDate: now, endDate: now, bill:0, paid:0, notes:'',
+    monthlyRate:0, serviceDays:null, advance:0,
+    status:'active',
+    history:[]
+  }, base);
+  const startText = `Service started on ${fmtDate(c.startDate)}` +
+    (c.monthlyRate>0 ? ` — contract ${fmtMoney(c.monthlyRate)}/month.` : '.');
+  c.history = [{date: now, text: startText}];
+  if(Number(c.paid) > 0){
+    c.history.unshift({date: now, text: `Opening payment recorded: ${fmtMoney(c.paid)}.`});
+  }
+  return c;
+}
+
+// Build initial store
+// NOTE: all bills start at ৳0 — Total Bill can only ever be calculated once a
+// Monthly Contract Rate is entered per client (no more manual bill entry).
+function buildDefaultStore(){
+  return {
+    order: ['2026-08','2026-09','2026-10'],
+    months: {
+      '2026-08': { label:'August 2026', clients: AUGUST_DATA.map(c => makeClient(Object.assign({}, c, {bill:0, monthlyRate:0}))) },
+      '2026-09': { label:'September 2026', clients: [] },
+      '2026-10': { label:'October 2026', clients: [] },
+    },
+    currentMonth: '2026-08',
+    view: 'dashboard',          // 'dashboard' | 'clients' | 'profiles' | 'crm' | 'duplicates'
+    search: '',
+    filter: 'all',
+    sortKey: 'name',
+    sortDir: 1,
+    selected: new Set(),
+    leads: [],
+    trash: []
+  };
+}
+
+/* ---------------- on-device auto-save (localStorage) ---------------- */
+const LOCAL_STORAGE_KEY = 'dhc_client_manager_data_v1';
+function loadStoredData(){
+  try{
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if(!raw) return null;
+    const data = JSON.parse(raw);
+    if(!data || !data.months || !data.order) return null;
+    return data;
+  }catch(err){
+    console.error('Could not read saved data', err);
+    return null;
+  }
+}
+
+const STORE = buildDefaultStore();
+const savedData = loadStoredData();
+if(savedData){
+  STORE.order = savedData.order;
+  STORE.months = savedData.months;
+  STORE.leads = savedData.leads || [];
+  STORE.trash = savedData.trash || [];
+  if(savedData.currentMonth && STORE.months[savedData.currentMonth]) STORE.currentMonth = savedData.currentMonth;
+}
+// recompute uidCounter so new ids never collide with data restored from this device
+(function syncUidCounter(){
+  let maxNum = 0;
+  Object.values(STORE.months).forEach(m => (m.clients||[]).forEach(c=>{
+    const match = /^c(\d+)_/.exec(c.id||'');
+    if(match) maxNum = Math.max(maxNum, parseInt(match[1]));
+  }));
+  (STORE.leads||[]).forEach(l=>{
+    const match = /^c(\d+)_/.exec(l.id||'');
+    if(match) maxNum = Math.max(maxNum, parseInt(match[1]));
+  });
+  uidCounter = maxNum + 1;
+})();
+
+STORE.savedAt = (savedData && (savedData.savedAt || Date.now())) || 0;
+function dataString(){ return JSON.stringify({ order: STORE.order, months: STORE.months, leads: STORE.leads, trash: STORE.trash }); }
+let lastDataStr = dataString();
+function writeLocal(){
+  const payload = { order: STORE.order, months: STORE.months, leads: STORE.leads, currentMonth: STORE.currentMonth, trash: STORE.trash, savedAt: STORE.savedAt };
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
+}
+let saveTimer = null;
+function saveToDevice(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    try{
+      const now = dataString();
+      const changed = now !== lastDataStr;
+      if(changed){ lastDataStr = now; STORE.savedAt = Date.now(); }
+      writeLocal();
+      if(changed && typeof gdOnLocalChange === 'function') gdOnLocalChange();
+    }catch(err){
+      console.error('Auto-save to this device failed', err);
+      toast('Could not auto-save to this device (storage may be full).', 'err');
+    }
+  }, 150);
+}
+
+/* ---------------- persistence (export / import, Excel format) ---------------- */
+function monthSheetName(base){
+  let name = (base||'Month').toString().replace(/[\[\]\*\?\/\\:]/g,'-');
+  if(name.length>31) name = name.slice(0,31);
+  return name || 'Month';
+}
+function clientToRow(c){
+  return {
+    ID:c.id, Name:c.name, Phone:c.phone, Location:c.location, Shift:c.shift, Type:c.type,
+    'Start Date':c.startDate||'', 'End Date':c.endDate||'',
+    'Monthly Rate':c.monthlyRate||0, 'Service Days':c.serviceDays==null?'':c.serviceDays,
+    Bill:c.bill||0, Paid:c.paid||0, Advance:c.advance||0,
+    Status:c.status||'active', Notes:c.notes||'',
+    History: JSON.stringify(c.history||[])
+  };
+}
+function rowToClient(r){
+  let history = [];
+  try{ history = JSON.parse(r['History']||'[]'); }catch(err){ history = []; }
+  if(!Array.isArray(history)) history = [];
+  const id = (r['ID']||'').toString().trim() || uid();
+  return {
+    id, name:(r['Name']||'').toString(), phone:(r['Phone']||'').toString(),
+    location:(r['Location']||'').toString(), shift:(r['Shift']!=null&&r['Shift']!=='')?r['Shift'].toString():'12',
+    type:(r['Type']||'').toString(), startDate:(r['Start Date']||'').toString(), endDate:(r['End Date']||'').toString(),
+    monthlyRate:Number(r['Monthly Rate'])||0,
+    serviceDays:(r['Service Days']===''||r['Service Days']==null)?null:(Number(r['Service Days'])||null),
+    bill:Number(r['Bill'])||0, paid:Number(r['Paid'])||0, advance:Number(r['Advance'])||0,
+    status:(r['Status']||'active').toString().toLowerCase().startsWith('clos')?'closed':'active',
+    notes:(r['Notes']||'').toString(), history
+  };
+}
+function leadToRow(l){
+  return { ID:l.id, Name:l.name, Phone:l.phone, Location:l.location, Source:l.source, Status:l.status, Notes:l.notes, 'Created At':l.createdAt };
+}
+function rowToLead(r){
+  return {
+    id:(r['ID']||'').toString().trim() || ('l'+(uidCounter++)+'_'+Math.random().toString(36).slice(2,8)),
+    name:(r['Name']||'').toString(), phone:(r['Phone']||'').toString(), location:(r['Location']||'').toString(),
+    source:(r['Source']||'Referral').toString(), status:(r['Status']||'New').toString(),
+    notes:(r['Notes']||'').toString(), createdAt:(r['Created At']||todayISO()).toString()
+  };
+}
+function exportBackup(){
+  if(typeof XLSX==='undefined'){ toast('Excel engine did not load — check your internet connection and try again.', 'err'); return; }
+  const wb = XLSX.utils.book_new();
+  const meta = { App:'Doctors Home Care Limited — Client & Payment Manager', Version:2, 'Exported At':new Date().toISOString(), 'Current Month':STORE.currentMonth };
+  const usedNames = new Set(['Meta','Leads']);
+  STORE.order.forEach((key,i)=>{
+    const month = STORE.months[key];
+    if(!month) return;
+    let name = monthSheetName(month.label || key);
+    let base = name, n = 2;
+    while(usedNames.has(name)){ name = monthSheetName(base.slice(0,27)+'-'+n); n++; }
+    usedNames.add(name);
+    meta['Month '+(i+1)+' Key'] = key;
+    meta['Month '+(i+1)+' Label'] = month.label || key;
+    meta['Month '+(i+1)+' Sheet'] = name;
+    const rows = month.clients.map(clientToRow);
+    const sheet = XLSX.utils.json_to_sheet(rows.length ? rows : [{}]);
+    XLSX.utils.book_append_sheet(wb, sheet, name);
+  });
+  const metaSheet = XLSX.utils.json_to_sheet([meta]);
+  XLSX.utils.book_append_sheet(wb, metaSheet, 'Meta');
+  const leadRows = (STORE.leads||[]).map(leadToRow);
+  const leadSheet = XLSX.utils.json_to_sheet(leadRows.length ? leadRows : [{}]);
+  XLSX.utils.book_append_sheet(wb, leadSheet, 'Leads');
+  const stamp = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `DHC-backup-${stamp}.xlsx`);
+  toast('Backup downloaded as an Excel file. Keep it somewhere safe.', 'ok');
+}
+function importBackup(file){
+  if(typeof XLSX==='undefined'){ toast('Excel engine did not load — check your internet connection and try again.', 'err'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+      const metaSheet = wb.Sheets['Meta'];
+      if(!metaSheet) throw new Error('no meta sheet');
+      const meta = XLSX.utils.sheet_to_json(metaSheet, {defval:''})[0] || {};
+      const order = []; const months = {};
+      let i = 1;
+      while(meta['Month '+i+' Key']){
+        const key = meta['Month '+i+' Key'].toString();
+        const label = (meta['Month '+i+' Label']||key).toString();
+        const sheetName = (meta['Month '+i+' Sheet']||label).toString();
+        const sheet = wb.Sheets[sheetName];
+        const rows = sheet ? XLSX.utils.sheet_to_json(sheet, {defval:''}) : [];
+        const clients = rows.filter(r=>(r['Name']||r['ID'])).map(rowToClient);
+        order.push(key);
+        months[key] = { label, clients };
+        i++;
+      }
+      if(!order.length) throw new Error('no months found');
+      const leadsSheet = wb.Sheets['Leads'];
+      const leadRows = leadsSheet ? XLSX.utils.sheet_to_json(leadsSheet, {defval:''}) : [];
+      const leads = leadRows.filter(r=>(r['Name']||r['ID'])).map(rowToLead);
+
+      STORE.order = order;
+      STORE.months = months;
+      STORE.leads = leads;
+      let maxNum = 0;
+      Object.values(STORE.months).forEach(m => m.clients.forEach(c=>{
+        const match = /^c(\d+)_/.exec(c.id||'');
+        if(match) maxNum = Math.max(maxNum, parseInt(match[1]));
+      }));
+      uidCounter = maxNum + 1;
+      const cm = (meta['Current Month']||'').toString();
+      STORE.currentMonth = STORE.months[cm] ? cm : order[0];
+      STORE.selected.clear();
+      renderAll();
+      toast('Backup loaded successfully.', 'ok');
+    }catch(err){
+      console.error(err);
+      toast('Could not read that file — is it a Doctors Home Care Excel backup?', 'err');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+
+/* ---------------- FULL APP BACKUP (JSON, everything) ---------------- */
+function backupCounts(){
+  let clients = 0;
+  Object.values(STORE.months).forEach(m => clients += (m.clients||[]).length);
+  return { months: STORE.order.length, clients, leads:(STORE.leads||[]).length, trash:(STORE.trash||[]).length };
+}
+function updateBackupSummary(){
+  const el = document.getElementById('backupSummary');
+  if(!el) return;
+  const c = backupCounts();
+  el.textContent = `Currently: ${c.months} month(s) · ${c.clients} client record(s) · ${c.leads} lead(s) · ${c.trash} item(s) in trash`;
+}
+function exportFullBackup(){
+  try{
+    const payload = {
+      app: 'DHCL Client & Payment Manager',
+      type: 'full-backup',
+      version: 3,
+      exportedAt: new Date().toISOString(),
+      data: JSON.parse(JSON.stringify({
+        order: STORE.order, months: STORE.months, leads: STORE.leads || [],
+        trash: STORE.trash || [], currentMonth: STORE.currentMonth
+      }))
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+    const d = new Date(), pad = n => String(n).padStart(2,'0');
+    const stamp = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}`;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `DHCL-FULL-BACKUP-${stamp}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+    toast('Full backup downloaded. Keep the file somewhere safe.', 'ok');
+  }catch(err){
+    console.error(err);
+    toast('Could not create the backup file.', 'err');
+  }
+}
+function restoreFullBackup(file){
+  const reader = new FileReader();
+  reader.onload = async e => {
+    let data;
+    try{
+      const parsed = JSON.parse(e.target.result);
+      data = parsed && parsed.data ? parsed.data : parsed;
+      if(!data || !Array.isArray(data.order) || !data.months || !data.order.length) throw new Error('bad format');
+      data.order.forEach(k => { if(!data.months[k] || !Array.isArray(data.months[k].clients)) throw new Error('bad month '+k); });
+    }catch(err){
+      console.error(err);
+      toast('That file is not a valid Full Backup (.json).', 'err');
+      return;
+    }
+    const nClients = data.order.reduce((s,k)=>s+data.months[k].clients.length,0);
+    const ok = await askConfirm(`Restore this backup? It contains ${data.order.length} month(s), ${nClients} client record(s), ${(data.leads||[]).length} lead(s) and ${(data.trash||[]).length} trash item(s). All current data on this device will be replaced.`, 'Restore full backup?');
+    if(!ok) return;
+    STORE.order = data.order;
+    STORE.months = data.months;
+    STORE.leads = data.leads || [];
+    STORE.trash = data.trash || [];
+    STORE.currentMonth = data.months[data.currentMonth] ? data.currentMonth : data.order[0];
+    STORE.selected.clear();
+    let maxNum = 0;
+    Object.values(STORE.months).forEach(m => m.clients.forEach(c=>{
+      const mt = /^c(\d+)_/.exec(c.id||''); if(mt) maxNum = Math.max(maxNum, parseInt(mt[1]));
+    }));
+    STORE.leads.forEach(l=>{ const mt = /^c(\d+)_/.exec(l.id||''); if(mt) maxNum = Math.max(maxNum, parseInt(mt[1])); });
+    uidCounter = Math.max(uidCounter, maxNum + 1);
+    saveToDevice();
+    renderAll();
+    toast('Full backup restored successfully.', 'ok');
+  };
+  reader.readAsText(file);
+}
+
+/* ---------------- helpers ---------------- */
+function currentClients(){
+  return STORE.months[STORE.currentMonth].clients;
+}
+function findClient(id){
+  return currentClients().find(c => c.id === id);
+}
+function due(c){ return Math.max(0, Math.ceil((Number(c.bill)||0) - (Number(c.paid)||0))); }
+function daysInMonthKey(key){
+  const [y,m] = (key||STORE.currentMonth).split('-').map(Number);
+  return new Date(y, m, 0).getDate();
+}
+function daysInMonthOfDate(dateStr){
+  const d = new Date(dateStr+'T00:00:00');
+  if(isNaN(d)) return daysInMonthKey(STORE.currentMonth);
+  return new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+}
+function lastDayOfMonthStr(dateStr){
+  const d = new Date(dateStr+'T00:00:00');
+  const last = new Date(d.getFullYear(), d.getMonth()+1, 0);
+  return last.toISOString().slice(0,10);
+}
+function daysBetweenInclusive(startStr, endStr){
+  const s = new Date(startStr+'T00:00:00');
+  const e = new Date(endStr+'T00:00:00');
+  return Math.max(1, Math.round((e-s)/86400000) + 1);
+}
+function addDaysStr(startStr, daysToAdd){
+  const s = new Date(startStr+'T00:00:00');
+  s.setDate(s.getDate() + daysToAdd);
+  return s.toISOString().slice(0,10);
+}
+function calcBillFromRate(rate, days, key){
+  rate = Number(rate)||0; days = Number(days)||0;
+  if(!rate || !days) return 0;
+  const dim = daysInMonthKey(key);
+  return Math.round((rate/dim)*days);
+}
+/* Total Bill auto-calculates from Contract Rate ÷ days-in-month × Total Duty days.
+   Falls back to a manually-entered bill only when no contract rate is set. */
+function autoCalcBill(c){
+  if(Number(c.monthlyRate) > 0){
+    const dim = c.startDate ? daysInMonthOfDate(c.startDate) : daysInMonthKey(STORE.currentMonth);
+    const days = (c.serviceDays!=null && c.serviceDays!=='') ? Number(c.serviceDays) : dim;
+    c.bill = Math.round((Number(c.monthlyRate)/dim) * days);
+  } else {
+    // No contract rate set — the bill can never be calculated, so it stays ৳0.
+    c.bill = 0;
+  }
+}
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+function nextMonthKey(key){
+  const [y,m] = key.split('-').map(Number);
+  let ny=y, nm=m+1;
+  if(nm>12){ nm=1; ny++; }
+  return `${ny}-${String(nm).padStart(2,'0')}`;
+}
+function monthLabelFromKey(key){
+  const [y,m] = key.split('-').map(Number);
+  return `${MONTH_NAMES[m-1]} ${y}`;
+}
+function ensureMonth(key){
+  if(!STORE.months[key]){
+    STORE.months[key] = {label: monthLabelFromKey(key), clients: []};
+    STORE.order.push(key);
+    STORE.order.sort();
+  }
+  return STORE.months[key];
+}
+function moveToNextMonth(id){
+  const c = findClient(id);
+  if(!c) return;
+  const curKey = STORE.currentMonth;
+  const nKey = nextMonthKey(curKey);
+  ensureMonth(nKey);
+  const clone = makeClient({
+    name:c.name, phone:c.phone, location:c.location, shift:c.shift, type:c.type,
+    startDate: nKey+'-01', endDate: nKey+'-28',
+    bill:c.bill, monthlyRate:c.monthlyRate||0, serviceDays:null,
+    paid:0, advance:c.advance||0, notes:c.notes, status:'active'
+  });
+  clone.history.push({date: todayISO(), text:`Continued from ${STORE.months[curKey].label}.`});
+  STORE.months[nKey].clients.push(clone);
+  addHistory(c, `Service continued into ${STORE.months[nKey].label}.`);
+  STORE.currentMonth = nKey;
+  STORE.selected.clear();
+  toast(`${c.name} moved to ${STORE.months[nKey].label}.`, 'ok');
+  renderAll();
+}
+function paymentBadge(c){
+  const d = due(c);
+  if((Number(c.bill)||0) === 0 || d === 0) return {cls:'chip-paid', text:'Paid'};
+  if((Number(c.paid)||0) > 0) return {cls:'chip-adv', text:'Partial'};
+  return {cls:'chip-unpaid', text:'Unpaid'};
+}
+function addHistory(c, text){
+  c.history.unshift({date: todayISO(), text});
+}
+
+/* ---------------- rendering ---------------- */
+function renderMonthTabs(){
+  const el = document.getElementById('monthRow');
+  el.innerHTML = '';
+  STORE.order.forEach(key => {
+    const m = STORE.months[key];
+    const tab = document.createElement('div');
+    tab.className = 'month-pill' + (key === STORE.currentMonth ? ' active' : '');
+    tab.innerHTML = `${m.label} <span class="cnt">${m.clients.length}</span>` +
+      (STORE.order.length > 1 ? `<span class="month-pill-del" title="Delete this month">✕</span>` : '');
+    tab.onclick = (e) => {
+      if(e.target.classList.contains('month-pill-del')){
+        e.stopPropagation();
+        deleteMonth(key);
+        return;
+      }
+      STORE.currentMonth = key; STORE.selected.clear(); renderAll();
+    };
+    el.appendChild(tab);
+  });
+  const addBtn = document.createElement('div');
+  addBtn.className = 'month-pill add';
+  addBtn.textContent = '+ Add Month';
+  addBtn.onclick = () => openModal('monthModalBackdrop');
+  el.appendChild(addBtn);
+}
+
+function renderStats(){
+  const clients = currentClients();
+  const totalCount = clients.length;
+  const activeCount = clients.filter(c=>c.status==='active').length;
+  const totalBill = clients.reduce((s,c)=>s+(Number(c.bill)||0),0);
+  const totalPaid = clients.reduce((s,c)=>s+(Number(c.paid)||0),0);
+  const totalDue = clients.reduce((s,c)=>s+due(c),0);
+  const totalAdvance = clients.reduce((s,c)=>s+(Number(c.advance)||0),0);
+  const el = document.getElementById('statsRow');
+  el.innerHTML = `
+    <div class="stat-card c1">
+      <div class="icon">👥</div>
+      <div class="lbl">Total Clients</div>
+      <div class="val">${totalCount}</div>
+      <div class="sub">${activeCount} active · ${totalCount-activeCount} closed</div>
+    </div>
+    <div class="stat-card c2">
+      <div class="icon">🧾</div>
+      <div class="lbl">Total Billed</div>
+      <div class="val">${fmtMoney(totalBill)}</div>
+      <div class="sub">${STORE.months[STORE.currentMonth].label}</div>
+    </div>
+    <div class="stat-card c3">
+      <div class="icon">✅</div>
+      <div class="lbl">Total Paid</div>
+      <div class="val">${fmtMoney(totalPaid)}</div>
+      <div class="sub">${totalBill? Math.round(totalPaid/totalBill*100):0}% collected</div>
+    </div>
+    <div class="stat-card c4">
+      <div class="icon">⚠️</div>
+      <div class="lbl">Total Due</div>
+      <div class="val">${fmtMoney(totalDue)}</div>
+      <div class="sub">${clients.filter(c=>due(c)>0).length} clients owing</div>
+    </div>
+    <div class="stat-card c5">
+      <div class="icon">🏦</div>
+      <div class="lbl">Advance Held</div>
+      <div class="val">${fmtMoney(totalAdvance)}</div>
+      <div class="sub">${clients.filter(c=>(Number(c.advance)||0)>0).length} clients</div>
+    </div>`;
+}
+
+function getFilteredSortedClients(){
+  let list = currentClients().slice();
+  const q = STORE.search.trim().toLowerCase();
+  if(q){
+    list = list.filter(c =>
+      (c.name||'').toLowerCase().includes(q) ||
+      (c.phone||'').toLowerCase().includes(q) ||
+      (c.location||'').toLowerCase().includes(q)
+    );
+  }
+  if(STORE.filter === 'active') list = list.filter(c=>c.status==='active');
+  if(STORE.filter === 'closed') list = list.filter(c=>c.status==='closed');
+  if(STORE.filter === 'unpaid') list = list.filter(c=>due(c)>0);
+  if(STORE.filter === 'paid') list = list.filter(c=>due(c)===0);
+  list.sort((a,b)=>{
+    // Closed / inactive clients always sink to the bottom, active stay on top.
+    if(a.status !== b.status){
+      if(a.status==='closed') return 1;
+      if(b.status==='closed') return -1;
+    }
+    if(STORE.sortKey){
+      const k = STORE.sortKey;
+      let av, bv;
+      if(k==='bill'||k==='paid') { av=Number(a[k])||0; bv=Number(b[k])||0; }
+      else if(k==='due'){ av=due(a); bv=due(b); }
+      else if(k==='period'){ av=a.startDate||''; bv=b.startDate||''; }
+      else if(k==='status'){ av=paymentBadge(a).text; bv=paymentBadge(b).text; }
+      else if(k==='service'){ av=a.status; bv=b.status; }
+      else if(k==='shift'){ av=(a.shift||'')+(a.type||''); bv=(b.shift||'')+(b.type||''); }
+      else { av=(a[k]||'').toString().toLowerCase(); bv=(b[k]||'').toString().toLowerCase(); }
+      if(av<bv) return -1*STORE.sortDir;
+      if(av>bv) return 1*STORE.sortDir;
+    }
+    return 0; // stable sort keeps original relative order otherwise
+  });
+  return list;
+}
+
+/* ---------------- profile modal live-refresh tracking ---------------- */
+let currentProfileId = null;
+function afterEdit(id){
+  renderAll();
+  if(currentProfileId && currentProfileId === id) openHistoryModal(id);
+}
+function closeProfileModal(){
+  currentProfileId = null;
+  closeModal('historyModalBackdrop');
+}
+
+/* ---------------- generic inline-edit helper ---------------- */
+function updateField(id, field, value, isNumber){
+  const c = findClient(id);
+  if(!c) return;
+  c[field] = isNumber ? (Number(value)||0) : value;
+  addHistory(c, 'Details updated.');
+  afterEdit(id);
+}
+/* Start date drives end-of-month + duty automatically. */
+function onStartDateChange(id, value){
+  const c = findClient(id);
+  if(!c || !value) return;
+  c.startDate = value;
+  c.endDate = lastDayOfMonthStr(value);
+  c.serviceDays = daysBetweenInclusive(c.startDate, c.endDate);
+  autoCalcBill(c);
+  addHistory(c, `Start date set to ${fmtDate(value)} — end date & total duty auto-updated to ${fmtDate(c.endDate)} / ${c.serviceDays} day(s).`);
+  afterEdit(id);
+}
+/* End date (e.g. closing early) recalculates duty + bill automatically. */
+function onEndDateChange(id, value){
+  const c = findClient(id);
+  if(!c || !value) return;
+  c.endDate = value;
+  if(c.startDate) c.serviceDays = daysBetweenInclusive(c.startDate, value);
+  autoCalcBill(c);
+  addHistory(c, `End date set to ${fmtDate(value)} — total duty & bill auto-updated to ${c.serviceDays} day(s).`);
+  afterEdit(id);
+}
+/* Editing duty days directly moves the end date to match, and recalculates the bill. */
+function onDutyChange(id, value){
+  const c = findClient(id);
+  if(!c) return;
+  const days = (value===''||value===null) ? null : Number(value);
+  c.serviceDays = days;
+  if(c.startDate && days!=null && days>0) c.endDate = addDaysStr(c.startDate, days-1);
+  autoCalcBill(c);
+  addHistory(c, `Total duty set to ${days ?? 'full month'} day(s) — end date & bill auto-updated.`);
+  afterEdit(id);
+}
+/* Editing the contract rate recalculates the bill automatically. */
+function onRateChange(id, value){
+  const c = findClient(id);
+  if(!c) return;
+  c.monthlyRate = Number(value)||0;
+  autoCalcBill(c);
+  addHistory(c, `Contract rate set to ${fmtMoney(c.monthlyRate)}/month — bill auto-updated.`);
+  afterEdit(id);
+}
+function perDayRate(c){
+  const dim = c.startDate ? daysInMonthOfDate(c.startDate) : daysInMonthKey(STORE.currentMonth);
+  if(Number(c.monthlyRate)>0) return Math.round(Number(c.monthlyRate)/dim);
+  if(Number(c.bill)>0 && Number(c.serviceDays)>0) return Math.round(Number(c.bill)/Number(c.serviceDays));
+  return 0;
+}
+function togglePaymentQuick(id){
+  const c = findClient(id);
+  if(!c) return;
+  if(due(c) > 0){
+    c.paid = Number(c.bill)||0;
+    addHistory(c, 'Marked as fully Paid.');
+    toast(`${c.name} marked as Paid.`, 'ok');
+  } else {
+    c.paid = 0;
+    addHistory(c, 'Marked as Unpaid.');
+    toast(`${c.name} marked as Unpaid.`, 'ok');
+  }
+  afterEdit(id);
+}
+function markSelectedPaid(){
+  if(!STORE.selected.size) return;
+  let n=0;
+  STORE.selected.forEach(id=>{
+    const c = findClient(id);
+    if(!c) return;
+    c.paid = Number(c.bill)||0;
+    addHistory(c, 'Marked as fully Paid (bulk action).');
+    n++;
+  });
+  toast(`${n} client(s) marked as Paid.`, 'ok');
+  renderAll();
+}
+
+function renderClientsTable(){
+  const tbody = document.getElementById('clientsBody');
+  const list = getFilteredSortedClients();
+  const empty = document.getElementById('emptyState');
+  document.getElementById('clientsTable').style.display = list.length? 'table':'none';
+  empty.style.display = list.length? 'none':'block';
+  tbody.innerHTML = '';
+  const dim = daysInMonthKey(STORE.currentMonth);
+  let sumBill=0, sumPaid=0, sumDue=0;
+  list.forEach((c, idx) => {
+    const tr = document.createElement('tr');
+    if(c.status==='closed') tr.classList.add('row-closed');
+    const badge = paymentBadge(c);
+    const d = due(c);
+    sumBill += Number(c.bill)||0; sumPaid += Number(c.paid)||0; sumDue += d;
+    tr.innerHTML = `
+      <td><span class="serial-badge">${idx+1}</span></td>
+      <td><input type="checkbox" class="rowcheck" data-id="${c.id}" ${STORE.selected.has(c.id)?'checked':''}></td>
+      <td>
+        <input class="cell-input" style="font-weight:800;" value="${escapeHtml(c.name)}" onchange="updateField('${c.id}','name',this.value)">
+        <input class="cell-input" style="font-size:11px;color:var(--ink-soft);" value="${escapeHtml(c.phone)}" placeholder="Phone" onchange="updateField('${c.id}','phone',this.value)">
+      </td>
+      <td><input class="cell-input" value="${escapeHtml(c.location)}" placeholder="Location" onchange="updateField('${c.id}','location',this.value)"></td>
+      <td>
+        <select class="cell-select" onchange="updateField('${c.id}','shift',this.value)">
+          ${['8','12','24','Other'].map(v=>`<option value="${v}" ${String(c.shift)===v?'selected':''}>${v==='Other'?'Other':v+' hr'}</option>`).join('')}
+        </select>
+        <input class="cell-input" value="${escapeHtml(c.type)}" placeholder="Duty type" onchange="updateField('${c.id}','type',this.value)">
+      </td>
+      <td><input type="date" class="cell-input date" title="Setting this auto-fills end date & total duty" value="${c.startDate||''}" onchange="onStartDateChange('${c.id}',this.value)"></td>
+      <td><input type="date" class="cell-input date" title="Editing this auto-recalculates total duty & bill" value="${c.endDate||''}" onchange="onEndDateChange('${c.id}',this.value)"></td>
+      <td><input type="number" class="cell-input num" min="0" value="${c.monthlyRate||''}" placeholder="0" title="Monthly contract — bill auto-calculates from this" onchange="onRateChange('${c.id}',this.value)"></td>
+      <td><input type="number" class="cell-input num" min="0" value="${c.serviceDays==null?'':c.serviceDays}" placeholder="${dim}" title="Days actually served this month" onchange="onDutyChange('${c.id}',this.value)"></td>
+      <td><span class="per-day-pill">৳${perDayRate(c).toLocaleString('en-US')}</span></td>
+      <td>${Number(c.monthlyRate)>0
+            ? `<span class="per-day-pill" style="background:var(--mint-100);color:var(--teal-700);" title="Auto-calculated: Contract ÷ days-in-month × Total Duty">৳${(Number(c.bill)||0).toLocaleString('en-US')}</span>`
+            : `<span class="badge-nocontract" title="Enter a Monthly Contract Rate to auto-calculate the bill">Set contract</span>`}</td>
+      <td><input type="number" class="cell-input num amt-paid" min="0" value="${c.paid||''}" placeholder="0" onchange="updateField('${c.id}','paid',this.value,true)"></td>
+      <td class="amt-due">${fmtMoney(d)}</td>
+      <td><button class="chip chip-btn ${badge.cls}" title="Click to toggle Paid / Unpaid" onclick="togglePaymentQuick('${c.id}')">${badge.text}</button></td>
+      <td><button class="chip chip-btn ${c.status==='active'?'chip-active':'chip-closed'}" title="Click to toggle Active / Inactive — inactive clients sink to the bottom" onclick="toggleClose('${c.id}')">${c.status==='active'?'Active':'Inactive'}</button></td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn ib-violet" title="Profile / History" onclick="openHistoryModal('${c.id}')">📜</button>
+          <button class="icon-btn ib-amber" title="Continue into next month" onclick="moveToNextMonth('${c.id}')">⏭️</button>
+          <button class="icon-btn del" title="Delete" onclick="deleteClient('${c.id}')">🗑️</button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  if(list.length){
+    const trTotal = document.createElement('tr');
+    trTotal.className = 'totals-row';
+    trTotal.innerHTML = `<td colspan="9" style="text-align:right;">Totals (${list.length} client${list.length>1?'s':''})</td>
+      <td>${fmtMoney(sumBill)}</td><td>${fmtMoney(sumPaid)}</td><td>${fmtMoney(sumDue)}</td><td colspan="3"></td>`;
+    tbody.appendChild(trTotal);
+  }
+  document.querySelectorAll('.rowcheck').forEach(cb=>{
+    cb.onchange = () => {
+      if(cb.checked) STORE.selected.add(cb.dataset.id); else STORE.selected.delete(cb.dataset.id);
+      updateCopyButtonState();
+    };
+  });
+  const selectAll = document.getElementById('selectAll');
+  selectAll.checked = list.length>0 && list.every(c=>STORE.selected.has(c.id));
+  document.getElementById('totalsNote').textContent =
+    `Serials (A, B, C…) follow the current sort order · Inactive clients automatically sink to the bottom · ${list.length} of ${currentClients().length} client(s) shown.`;
+}
+
+/* ---------------- dashboard analytics (no client list here) ---------------- */
+function barsHtml(rows, max){
+  return rows.map(r=>`
+    <div class="bar-row">
+      <span class="bar-label">${escapeHtml(r.label)}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${max? (r.value/max*100).toFixed(1):0}%;background:${r.color};"></div></div>
+      <span class="bar-value">${r.display!==undefined? r.display : r.value}</span>
+    </div>`).join('') || '<div class="hist-empty">No data yet.</div>';
+}
+function renderDashboardCharts(){
+  const clients = currentClients();
+  const grid = document.getElementById('chartsGrid');
+  const totalBill = clients.reduce((s,c)=>s+(Number(c.bill)||0),0);
+  const totalPaid = clients.reduce((s,c)=>s+(Number(c.paid)||0),0);
+  const collectPct = totalBill? Math.round(totalPaid/totalBill*100) : 0;
+
+  // service status
+  const activeN = clients.filter(c=>c.status==='active').length;
+  const closedN = clients.length-activeN;
+  const serviceRows = [
+    {label:'Active', value:activeN, color:'var(--mint-400)'},
+    {label:'Inactive', value:closedN, color:'var(--coral-500)'}
+  ];
+
+  // payment status
+  const paidN = clients.filter(c=>due(c)===0).length;
+  const partialN = clients.filter(c=>due(c)>0 && (Number(c.paid)||0)>0).length;
+  const unpaidN = clients.filter(c=>due(c)>0 && (Number(c.paid)||0)===0).length;
+  const paymentRows = [
+    {label:'Paid', value:paidN, color:'var(--mint-400)'},
+    {label:'Partial', value:partialN, color:'var(--amber-500)'},
+    {label:'Unpaid', value:unpaidN, color:'var(--coral-500)'}
+  ];
+
+  // top locations
+  const locMap = {};
+  clients.forEach(c=>{ const k=c.location||'Unspecified'; locMap[k]=(locMap[k]||0)+1; });
+  const locRows = Object.entries(locMap).sort((a,b)=>b[1]-a[1]).slice(0,6)
+    .map(([label,value])=>({label, value, color:'var(--violet-500)'}));
+
+  // duty / shift breakdown
+  const shiftMap = {};
+  clients.forEach(c=>{ const k=(c.shift||'Other')+' hr'; shiftMap[k]=(shiftMap[k]||0)+1; });
+  const shiftRows = Object.entries(shiftMap).sort((a,b)=>b[1]-a[1])
+    .map(([label,value])=>({label, value, color:'var(--teal-600)'}));
+
+  // monthly billing trend
+  const monthRows = STORE.order.map(k=>{
+    const total = STORE.months[k].clients.reduce((s,c)=>s+(Number(c.bill)||0),0);
+    return {label: STORE.months[k].label, value: total, color:'var(--amber-500)', display: fmtMoney(total)};
+  });
+
+  const maxOf = arr => Math.max(1, ...arr.map(r=>r.value));
+
+  grid.innerHTML = `
+    <div class="chart-card">
+      <h4>🟢 Service Status</h4>
+      ${barsHtml(serviceRows, maxOf(serviceRows))}
+    </div>
+    <div class="chart-card">
+      <h4>💳 Payment Status</h4>
+      ${barsHtml(paymentRows, maxOf(paymentRows))}
+    </div>
+    <div class="chart-card">
+      <h4>📍 Top Locations</h4>
+      ${barsHtml(locRows, maxOf(locRows))}
+    </div>
+    <div class="chart-card">
+      <h4>🕒 Duty / Shift Breakdown</h4>
+      ${barsHtml(shiftRows, maxOf(shiftRows))}
+    </div>
+    <div class="chart-card">
+      <h4>📈 Monthly Billing Trend</h4>
+      ${barsHtml(monthRows, maxOf(monthRows))}
+    </div>
+    <div class="chart-card">
+      <h4>🎯 Collection Rate</h4>
+      <div class="gauge-wrap">
+        <div class="gauge" style="background:conic-gradient(var(--mint-400) ${collectPct}%, var(--border) ${collectPct}%);">
+          <div class="g-inner"><b>${collectPct}%</b><span>COLLECTED</span></div>
+        </div>
+        <div class="gauge-note">
+          Billed <b style="color:var(--ink);">${fmtMoney(totalBill)}</b><br>
+          Paid <b style="color:var(--teal-700);">${fmtMoney(totalPaid)}</b><br>
+          Due <b style="color:var(--coral-500);">${fmtMoney(totalBill-totalPaid)}</b>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ---------------- client profile directory ---------------- */
+function initials(name){
+  return (name||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase() || '?';
+}
+function renderProfilesGrid(){
+  const grid = document.getElementById('profilesGrid');
+  const empty = document.getElementById('profilesEmpty');
+  const list = getFilteredSortedClients();
+  grid.style.display = list.length? 'grid':'none';
+  empty.style.display = list.length? 'none':'block';
+  grid.innerHTML = list.map((c, idx)=>{
+    return `
+    <div class="profile-card" onclick="openHistoryModal('${c.id}')">
+      <div class="profile-top">
+        <div class="profile-avatar">${initials(c.name)}</div>
+        <div>
+          <div class="profile-name">${escapeHtml(c.name)} <span class="serial-badge" style="margin-left:4px;">${idx+1}</span></div>
+          <div class="profile-sub">📍 ${escapeHtml(c.location||'—')}</div>
+        </div>
+      </div>
+      <div class="profile-row"><span>Duty</span><b>${escapeHtml(c.shift||'—')} hr · ${escapeHtml(c.type||'—')}</b></div>
+      <div class="profile-row"><span>Contract</span><b>${c.monthlyRate? fmtMoney(c.monthlyRate)+'/mo' : '—'}</b></div>
+      <div class="profile-row"><span>Period</span><b>${fmtDateShort(c.startDate)} → ${fmtDateShort(c.endDate)}</b></div>
+      <div class="profile-row"><span>Due</span><b style="color:var(--coral-500);">${fmtMoney(due(c))}</b></div>
+      <div class="profile-chips">
+        <span class="chip ${c.status==='active'?'chip-active':'chip-closed'}">${c.status==='active'?'Active':'Inactive'}</span>
+        <button class="chip chip-btn" style="background:var(--violet-100);color:#5A4FD1;" onclick="event.stopPropagation();openHistoryModal('${c.id}')">📊 Full View</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderCurrentListView(){
+  if(STORE.view==='clients') renderClientsTable();
+  else if(STORE.view==='profiles') renderProfilesGrid();
+}
+
+function renderCopyTargets(){
+  const sel = document.getElementById('copyTargetSelect');
+  sel.innerHTML = '';
+  STORE.order.filter(k=>k!==STORE.currentMonth).forEach(k=>{
+    const opt = document.createElement('option');
+    opt.value = k; opt.textContent = STORE.months[k].label;
+    sel.appendChild(opt);
+  });
+}
+
+function updateCopyButtonState(){
+  document.getElementById('btnCopySelected').disabled = STORE.selected.size===0;
+  const mp = document.getElementById('btnMarkPaid');
+  if(mp) mp.disabled = STORE.selected.size===0;
+}
+
+/* =========================================================
+   CRM / LEADS
+   ========================================================= */
+STORE.leadSearch = STORE.leadSearch || '';
+STORE.leadFilter = STORE.leadFilter || 'all';
+function makeLead(base){
+  return Object.assign({
+    id: 'l'+(uidCounter++)+'_'+Math.random().toString(36).slice(2,8),
+    name:'', phone:'', location:'', source:'Referral', status:'New', notes:'',
+    createdAt: todayISO()
+  }, base);
+}
+function findLead(id){ return STORE.leads.find(l=>l.id===id); }
+function getFilteredLeads(){
+  let list = STORE.leads.slice();
+  const q = (STORE.leadSearch||'').trim().toLowerCase();
+  if(q) list = list.filter(l => (l.name||'').toLowerCase().includes(q) || (l.phone||'').toLowerCase().includes(q) || (l.source||'').toLowerCase().includes(q));
+  if(STORE.leadFilter && STORE.leadFilter!=='all') list = list.filter(l => l.status === STORE.leadFilter);
+  return list;
+}
+function leadStatusClass(status){
+  return {New:'new', Contacted:'contacted', Interested:'interested', Converted:'converted', Lost:'lost'}[status] || 'new';
+}
+function renderLeadsTable(){
+  const tbody = document.getElementById('leadsBody');
+  const list = getFilteredLeads();
+  document.getElementById('leadsEmpty').style.display = list.length? 'none':'block';
+  tbody.innerHTML = list.map((l, idx)=>`
+    <tr>
+      <td><span class="serial-badge">${idx+1}</span></td>
+      <td class="client-name">${escapeHtml(l.name)}</td>
+      <td>${escapeHtml(l.phone||'—')}</td>
+      <td>${escapeHtml(l.location||'—')}</td>
+      <td>${escapeHtml(l.source||'—')}</td>
+      <td><span class="lead-status ${leadStatusClass(l.status)}">${escapeHtml(l.status)}</span></td>
+      <td style="max-width:200px;white-space:normal;color:var(--ink-soft);font-size:12px;">${escapeHtml(l.notes||'—')}</td>
+      <td>
+        <div class="row-actions">
+          <button class="btn btn-mint btn-sm" title="Convert to Client / Payment List" onclick="convertLead('${l.id}')" ${l.status==='Converted'?'disabled':''}>➡️ Convert</button>
+          <button class="icon-btn ib-violet" title="Edit lead" onclick="openEditLead('${l.id}')">✏️</button>
+          <button class="icon-btn del" title="Delete lead" onclick="deleteLead('${l.id}')">🗑️</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+let editingLeadId = null;
+function openAddLeadModal(){
+  editingLeadId = null;
+  document.getElementById('leadModalTitle').textContent = 'Add Lead';
+  document.getElementById('l_name').value = '';
+  document.getElementById('l_phone').value = '';
+  document.getElementById('l_location').value = '';
+  document.getElementById('l_source').value = 'Referral';
+  document.getElementById('l_status').value = 'New';
+  document.getElementById('l_notes').value = '';
+  openModal('leadModalBackdrop');
+}
+function openEditLead(id){
+  const l = findLead(id);
+  if(!l) return;
+  editingLeadId = id;
+  document.getElementById('leadModalTitle').textContent = 'Edit Lead';
+  document.getElementById('l_name').value = l.name;
+  document.getElementById('l_phone').value = l.phone;
+  document.getElementById('l_location').value = l.location;
+  document.getElementById('l_source').value = l.source;
+  document.getElementById('l_status').value = l.status==='Converted' ? 'New' : l.status;
+  document.getElementById('l_notes').value = l.notes;
+  openModal('leadModalBackdrop');
+}
+document.getElementById('btnAddLead').onclick = openAddLeadModal;
+document.getElementById('btnSaveLead').onclick = () => {
+  const name = document.getElementById('l_name').value.trim();
+  if(!name){ toast('Please enter a lead name.', 'err'); return; }
+  const data = {
+    name,
+    phone: document.getElementById('l_phone').value.trim(),
+    location: document.getElementById('l_location').value.trim(),
+    source: document.getElementById('l_source').value,
+    status: document.getElementById('l_status').value,
+    notes: document.getElementById('l_notes').value.trim()
+  };
+  if(editingLeadId){
+    Object.assign(findLead(editingLeadId), data);
+    toast('Lead updated.', 'ok');
+  } else {
+    STORE.leads.push(makeLead(data));
+    toast('Lead added.', 'ok');
+  }
+  closeModal('leadModalBackdrop');
+  renderAll();
+};
+async function deleteLead(id){
+  const l = findLead(id);
+  if(!l) return;
+  const ok = await askConfirm(`Delete lead "${l.name}"? This cannot be undone.`, 'Delete lead?');
+  if(!ok) return;
+  STORE.leads = STORE.leads.filter(x=>x.id!==id);
+  toast('Lead deleted.', 'ok');
+  renderAll();
+}
+/* Converting a lead creates a real client in the current month's Payment List
+   (which is also what powers Client Profiles) and jumps straight there. */
+function convertLead(id){
+  const l = findLead(id);
+  if(!l) return;
+  const c = makeClient({
+    name: l.name, phone: l.phone, location: l.location,
+    shift:'12', type:'Caregiver',
+    startDate: STORE.currentMonth+'-01', endDate: STORE.currentMonth+'-28',
+    monthlyRate:0, serviceDays:null, paid:0, advance:0,
+    status:'active', notes: l.notes ? `Converted from lead (${l.source}). ${l.notes}` : `Converted from lead (${l.source}).`
+  });
+  autoCalcBill(c);
+  currentClients().push(c);
+  l.status = 'Converted';
+  STORE.view = 'clients';
+  STORE.search = l.name;
+  STORE.selected.clear();
+  toast(`${l.name} converted — now in the Payment List (${STORE.months[STORE.currentMonth].label}).`, 'ok');
+  renderAll();
+}
+document.getElementById('leadSearchInput').addEventListener('input', e=>{
+  STORE.leadSearch = e.target.value;
+  renderLeadsTable();
+});
+document.getElementById('leadFilterStatus').addEventListener('change', e=>{
+  STORE.leadFilter = e.target.value;
+  renderLeadsTable();
+});
+
+/* =========================================================
+   DUPLICATE FINDER
+   ========================================================= */
+function findDuplicateGroups(){
+  const groups = [];
+  STORE.order.forEach(key=>{
+    const clients = STORE.months[key].clients;
+    const map = {};
+    clients.forEach(c=>{
+      const phoneKey = normPhone(c.phone);
+      const k = phoneKey.length>=6 ? ('p:'+phoneKey) : (normName(c.name) ? ('n:'+normName(c.name)) : null);
+      if(!k) return;
+      (map[k] = map[k]||[]).push(c);
+    });
+    Object.values(map).forEach(arr=>{
+      if(arr.length>1) groups.push({monthKey:key, monthLabel: STORE.months[key].label, clients:arr});
+    });
+  });
+  return groups;
+}
+function renderDuplicates(){
+  const groups = findDuplicateGroups();
+  document.getElementById('duplicatesEmpty').style.display = groups.length? 'none':'block';
+  document.getElementById('duplicatesList').innerHTML = groups.map(g=>`
+    <div class="dup-group">
+      <div class="dup-group-head">
+        <b>${escapeHtml(g.monthLabel)}</b>
+        <span>${g.clients.length} matching entries — same phone${g.clients.every(c=>!normPhone(c.phone))?' / name':''}</span>
+      </div>
+      ${g.clients.map(c=>`
+        <div class="dup-row">
+          <div class="dr-main">
+            <b>${escapeHtml(c.name)}</b>
+            <span>${escapeHtml(c.phone||'No phone')} · ${escapeHtml(c.location||'—')} · Bill ${fmtMoney(c.bill)} · Paid ${fmtMoney(c.paid)}</span>
+          </div>
+          <div class="row-actions">
+            <button class="icon-btn ib-violet" title="View profile" onclick="viewDuplicateProfile('${g.monthKey}','${c.id}')">📜</button>
+            <button class="icon-btn del" title="Delete this entry" onclick="dupDelete('${g.monthKey}','${c.id}')">🗑️</button>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+function viewDuplicateProfile(monthKey, id){
+  STORE.currentMonth = monthKey;
+  STORE.view = 'clients';
+  renderAll();
+  openHistoryModal(id);
+}
+async function dupDelete(monthKey, id){
+  if(await deleteClientFromMonth(monthKey, id)){
+    toast('Duplicate entry deleted.', 'ok');
+    renderAll();
+  }
+}
+
+function escapeHtml(s){
+  return (s??'').toString().replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function normPhone(p){ return (p||'').replace(/\D/g,''); }
+function normName(n){ return (n||'').trim().toLowerCase(); }
+
+function renderAll(){
+  renderMonthTabs();
+  renderStats();
+  renderCopyTargets();
+  updateCopyButtonState();
+  document.querySelectorAll('.nav-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.view === STORE.view);
+  });
+  document.getElementById('dashboardPanel').style.display  = STORE.view==='dashboard'  ? 'block':'none';
+  document.getElementById('clientsPanel').style.display    = STORE.view==='clients'    ? 'block':'none';
+  document.getElementById('profilesPanel').style.display   = STORE.view==='profiles'   ? 'block':'none';
+  document.getElementById('crmPanel').style.display        = STORE.view==='crm'        ? 'block':'none';
+  document.getElementById('duplicatesPanel').style.display = STORE.view==='duplicates' ? 'block':'none';
+  document.getElementById('trashPanel').style.display      = STORE.view==='trash'      ? 'block':'none';
+
+  const monthScoped = (STORE.view==='dashboard'||STORE.view==='clients'||STORE.view==='profiles');
+  document.getElementById('monthRow').style.display = monthScoped ? 'flex' : 'none';
+  document.getElementById('statsRow').style.display = monthScoped ? 'grid' : 'none';
+
+  if(STORE.view === 'dashboard'){
+    document.getElementById('pageTitle').textContent = 'Dashboard';
+    document.getElementById('pageSub').textContent = 'A quick, at-a-glance overview — open Payment List to manage individual clients';
+    renderDashboardCharts();
+    updateBackupSummary();
+  } else if(STORE.view === 'clients'){
+    document.getElementById('pageTitle').textContent = 'Payment List';
+    document.getElementById('pageSub').textContent = 'Every field is editable inline — click a chip to toggle Paid/Unpaid or Active/Inactive';
+    document.getElementById('searchInput').value = STORE.search;
+    document.getElementById('filterStatus').value = STORE.filter;
+    renderClientsTable();
+  } else if(STORE.view === 'profiles'){
+    document.getElementById('pageTitle').textContent = 'Client Profiles';
+    document.getElementById('pageSub').textContent = 'Browse every client as a profile card — click a card for full history';
+    document.getElementById('profileSearchInput').value = STORE.search;
+    document.getElementById('profileFilterStatus').value = STORE.filter;
+    renderProfilesGrid();
+  } else if(STORE.view === 'crm'){
+    document.getElementById('pageTitle').textContent = 'CRM / Leads';
+    document.getElementById('pageSub').textContent = 'Track leads and convert them straight into the Client & Payment List with one click';
+    renderLeadsTable();
+  } else if(STORE.view === 'duplicates'){
+    document.getElementById('pageTitle').textContent = 'Duplicate Finder';
+    document.getElementById('pageSub').textContent = 'Find and clean up clients that may have been entered more than once';
+    renderDuplicates();
+  } else if(STORE.view === 'trash'){
+    document.getElementById('pageTitle').textContent = 'Deleted & Restore Data';
+    document.getElementById('pageSub').textContent = 'Restore deleted clients and months, or permanently erase them';
+    renderTrash();
+  }
+  saveToDevice();
+}
+
+/* ---------------- sidebar navigation ---------------- */
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    STORE.view = btn.dataset.view;
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('backdropMobile').classList.remove('show');
+    renderAll();
+  });
+});
+document.getElementById('menuToggle').onclick = ()=>{
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('backdropMobile').classList.toggle('show');
+};
+document.getElementById('backdropMobile').onclick = ()=>{
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('backdropMobile').classList.remove('show');
+};
+
+/* ---------------- toast ---------------- */
+let toastTimer = null;
+function toast(msg, kind){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('err','ok');
+  if(kind==='err') t.classList.add('err');
+  if(kind==='ok') t.classList.add('ok');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 2600);
+}
+
+/* ---------------- modals ---------------- */
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+/* ---------------- custom confirm modal (replaces window.confirm) ---------------- */
+let _confirmResolve = null;
+function askConfirm(message, title){
+  return new Promise(resolve=>{
+    _confirmResolve = resolve;
+    document.getElementById('confirmModalTitle').textContent = title || 'Please confirm';
+    document.getElementById('confirmModalMessage').textContent = message;
+    openModal('confirmModalBackdrop');
+  });
+}
+function closeConfirmModal(result){
+  closeModal('confirmModalBackdrop');
+  if(_confirmResolve){ const r=_confirmResolve; _confirmResolve=null; r(result); }
+}
+document.getElementById('confirmModalOk').onclick = () => closeConfirmModal(true);
+document.getElementById('confirmModalCancel').onclick = () => closeConfirmModal(false);
+document.getElementById('confirmModalBackdrop').addEventListener('click', e=>{
+  if(e.target.id==='confirmModalBackdrop') closeConfirmModal(false);
+});
+
+let editingId = null;
+function openAddModal(){
+  editingId = null;
+  document.getElementById('clientModalTitle').textContent = 'Add Client';
+  document.getElementById('f_name').value='';
+  document.getElementById('f_phone').value='';
+  document.getElementById('f_location').value='';
+  document.getElementById('f_shift').value='12';
+  document.getElementById('f_type').value='Caregiver';
+  document.getElementById('f_start').value = STORE.currentMonth + '-01';
+  document.getElementById('f_end').value = STORE.currentMonth + '-28';
+  document.getElementById('f_rate').value='';
+  document.getElementById('f_days').value='';
+  document.getElementById('f_paid').value='0';
+  document.getElementById('f_advance').value='0';
+  document.getElementById('f_notes').value='';
+  updateBillPreview();
+  openModal('clientModalBackdrop');
+}
+function openEditModal(id){
+  const c = findClient(id);
+  if(!c) return;
+  editingId = id;
+  document.getElementById('clientModalTitle').textContent = 'Edit Client';
+  document.getElementById('f_name').value=c.name;
+  document.getElementById('f_phone').value=c.phone;
+  document.getElementById('f_location').value=c.location;
+  document.getElementById('f_shift').value=['8','12','24'].includes(c.shift)?c.shift:'Other';
+  document.getElementById('f_type').value=['Caregiver','Nurse','Attendant'].includes(c.type)?c.type:'Other';
+  document.getElementById('f_start').value=c.startDate;
+  document.getElementById('f_end').value=c.endDate;
+  document.getElementById('f_rate').value=c.monthlyRate||'';
+  document.getElementById('f_days').value=c.serviceDays||'';
+  document.getElementById('f_paid').value=c.paid;
+  document.getElementById('f_advance').value=c.advance||0;
+  document.getElementById('f_notes').value=c.notes||'';
+  updateBillPreview();
+  openModal('clientModalBackdrop');
+}
+function updateBillPreview(){
+  const rate = Number(document.getElementById('f_rate').value)||0;
+  const daysInput = document.getElementById('f_days').value;
+  const dim = daysInMonthKey(STORE.currentMonth);
+  const days = daysInput!=='' ? Number(daysInput) : dim;
+  const amount = rate>0 ? calcBillFromRate(rate, days, STORE.currentMonth) : 0;
+  const el = document.getElementById('f_billPreview');
+  if(el) el.textContent = fmtMoney(amount);
+}
+document.getElementById('btnAddClient').onclick = openAddModal;
+
+document.getElementById('btnSaveClient').onclick = () => {
+  const name = document.getElementById('f_name').value.trim();
+  if(!name){ toast('Please enter a client name.', 'err'); return; }
+  const data = {
+    name,
+    phone: document.getElementById('f_phone').value.trim(),
+    location: document.getElementById('f_location').value.trim(),
+    shift: document.getElementById('f_shift').value,
+    type: document.getElementById('f_type').value,
+    startDate: document.getElementById('f_start').value,
+    endDate: document.getElementById('f_end').value,
+    monthlyRate: Number(document.getElementById('f_rate').value)||0,
+    serviceDays: document.getElementById('f_days').value ? Number(document.getElementById('f_days').value) : null,
+    paid: Number(document.getElementById('f_paid').value)||0,
+    advance: Number(document.getElementById('f_advance').value)||0,
+    notes: document.getElementById('f_notes').value.trim()
+  };
+  if(editingId){
+    const c = findClient(editingId);
+    Object.assign(c, data);
+    autoCalcBill(c);
+    addHistory(c, 'Client details updated.');
+    toast('Client updated.', 'ok');
+  } else {
+    const c = makeClient(data);
+    autoCalcBill(c);
+    currentClients().push(c);
+    toast('Client added.', 'ok');
+  }
+  closeModal('clientModalBackdrop');
+  renderAll();
+};
+
+function fmtDutyLine(c, dim){
+  return c.serviceDays? `${c.serviceDays} of ${dim} days billed` : 'Full month / continuing';
+}
+
+/* ---- read-only field grid ---- */
+function renderProfileViewFields(c, dim){
+  const fields = [
+    ['Client / Patient Name', escapeHtml(c.name)||'—', true],
+    ['Phone', escapeHtml(c.phone)||'—'],
+    ['Location', escapeHtml(c.location)||'—'],
+    ['Shift', (c.shift||'—')+(c.shift?' hr':'')],
+    ['Duty Type', escapeHtml(c.type)||'—'],
+    ['Start Date', fmtDate(c.startDate)],
+    ['End Date', c.status==='closed'? fmtDate(c.endDate) : 'Automatic — set when service is closed'],
+    ['Contract Rate (৳/mo)', c.monthlyRate? fmtMoney(c.monthlyRate):'৳0 — set contract to calculate bill'],
+    ['Total Duty (days)', c.serviceDays==null? `Full month (${dim})` : c.serviceDays],
+    ['Paid So Far (৳)', fmtMoney(c.paid)],
+    ['Notes', escapeHtml(c.notes||'—'), true],
+  ];
+  document.getElementById('profileViewFields').innerHTML = fields.map(([label,value,full])=>
+    `<div class="pv-field${full?' full':''}"><label>${label}</label><span>${value}</span></div>`
+  ).join('');
+}
+
+/* ---- editable field grid (only shown after clicking Edit) ---- */
+function renderProfileEditFields(c, dim){
+  document.getElementById('profileEditFields').innerHTML = `
+    <div class="form-row full">
+      <label>Client / Patient Name</label>
+      <input id="pe_name" class="cell-input" style="width:100%;background:var(--bg);border-color:var(--border);" value="${escapeHtml(c.name)}">
+    </div>
+    <div class="form-row">
+      <label>Phone</label>
+      <input id="pe_phone" class="cell-input" style="width:100%;background:var(--bg);border-color:var(--border);" value="${escapeHtml(c.phone)}">
+    </div>
+    <div class="form-row">
+      <label>Location</label>
+      <input id="pe_location" class="cell-input" style="width:100%;background:var(--bg);border-color:var(--border);" value="${escapeHtml(c.location)}">
+    </div>
+    <div class="form-row">
+      <label>Shift</label>
+      <select id="pe_shift" class="cell-select" style="width:100%;background:var(--bg);border-color:var(--border);">
+        ${['8','12','24','Other'].map(v=>`<option value="${v}" ${String(c.shift)===v?'selected':''}>${v==='Other'?'Other':v+' hr'}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Duty Type</label>
+      <input id="pe_type" class="cell-input" style="width:100%;background:var(--bg);border-color:var(--border);" value="${escapeHtml(c.type)}">
+    </div>
+    <div class="form-row">
+      <label>Start Date (auto-fills end date + duty)</label>
+      <input id="pe_start" type="date" class="cell-input" style="width:100%;background:var(--bg);border-color:var(--border);" value="${c.startDate||''}">
+    </div>
+    <div class="form-row">
+      <label>Contract Rate (৳/mo)</label>
+      <input id="pe_rate" type="number" class="cell-input" style="width:100%;background:var(--bg);border-color:var(--border);" value="${c.monthlyRate||''}">
+    </div>
+    <div class="form-row">
+      <label>Total Duty (days)</label>
+      <input id="pe_days" type="number" class="cell-input" style="width:100%;background:var(--bg);border-color:var(--border);" value="${c.serviceDays==null?'':c.serviceDays}" placeholder="${dim}">
+    </div>
+    <div class="form-row">
+      <label>Paid So Far (৳)</label>
+      <input id="pe_paid" type="number" class="cell-input" style="width:100%;background:var(--bg);border-color:var(--border);" value="${c.paid||''}">
+    </div>
+    <p class="helper-text" style="grid-column:1/-1;">End Date is not edited here — it's set automatically when you close this client's service (toggle Active/Inactive from the Payment List or below).</p>
+    <div class="form-row full">
+      <label>Notes</label>
+      <textarea id="pe_notes" class="cell-input" style="width:100%;background:var(--bg);border-color:var(--border);min-height:54px;">${escapeHtml(c.notes||'')}</textarea>
+    </div>`;
+}
+
+function startProfileEdit(){
+  document.getElementById('profileViewFields').style.display = 'none';
+  document.getElementById('profileEditFields').style.display = 'grid';
+  document.getElementById('btnProfileEdit').style.display = 'none';
+  document.getElementById('btnProfileSave').style.display = 'inline-flex';
+  document.getElementById('btnProfileCancel').style.display = 'inline-flex';
+}
+function cancelProfileEdit(){
+  document.getElementById('profileViewFields').style.display = 'grid';
+  document.getElementById('profileEditFields').style.display = 'none';
+  document.getElementById('btnProfileEdit').style.display = 'inline-flex';
+  document.getElementById('btnProfileSave').style.display = 'none';
+  document.getElementById('btnProfileCancel').style.display = 'none';
+}
+function saveProfileEdit(){
+  const c = findClient(currentProfileId);
+  if(!c) return;
+  c.name = document.getElementById('pe_name').value.trim() || c.name;
+  c.phone = document.getElementById('pe_phone').value.trim();
+  c.location = document.getElementById('pe_location').value.trim();
+  c.shift = document.getElementById('pe_shift').value;
+  c.type = document.getElementById('pe_type').value.trim();
+  c.monthlyRate = Number(document.getElementById('pe_rate').value)||0;
+  const daysVal = document.getElementById('pe_days').value;
+
+  const newStart = document.getElementById('pe_start').value;
+  if(newStart && newStart !== c.startDate){
+    // start date changed — auto-fill end date & total duty from it (same rule as the Payment List)
+    c.startDate = newStart;
+    c.endDate = lastDayOfMonthStr(newStart);
+    c.serviceDays = daysBetweenInclusive(c.startDate, c.endDate);
+  } else {
+    c.serviceDays = daysVal==='' ? null : Number(daysVal);
+  }
+  c.paid = Number(document.getElementById('pe_paid').value)||0;
+  c.notes = document.getElementById('pe_notes').value.trim();
+  autoCalcBill(c);
+  addHistory(c, 'Profile details updated.');
+  toast('Profile saved.', 'ok');
+  afterEdit(currentProfileId);
+}
+
+/* ---- Full View: this client's bill/paid/due across every month ---- */
+function getClientTimeline(c){
+  const phoneKey = normPhone(c.phone);
+  const nameKey = normName(c.name);
+  const rows = [];
+  STORE.order.forEach(key=>{
+    const match = STORE.months[key].clients.find(x =>
+      (phoneKey && normPhone(x.phone)===phoneKey) || (!phoneKey && normName(x.name)===nameKey)
+    );
+    if(match) rows.push({monthKey:key, label:STORE.months[key].label, client:match});
+  });
+  return rows;
+}
+function renderFullViewInline(c){
+  const rows = getClientTimeline(c);
+  if(!rows.length){ document.getElementById('fullViewInline').innerHTML = '<div class="fv-empty">No monthly records found.</div>'; return; }
+  const lastRow = rows[rows.length-1];
+  const lastPaidNote = lastRow.monthKey!==STORE.currentMonth
+    ? `<div class="fv-empty">Most recent month on record (${lastRow.label}): <b style="color:${due(lastRow.client)>0?'var(--coral-500)':'var(--teal-700)'};">${due(lastRow.client)>0?'Not fully paid':'Paid'}</b></div>`
+    : '';
+  document.getElementById('fullViewInline').innerHTML = `
+    <table class="fv-table">
+      <thead><tr><th>Month</th><th>Contract</th><th>Total Bill</th><th>Paid</th><th>Due</th><th>Status</th></tr></thead>
+      <tbody>
+        ${rows.map(r=>{
+          const b = paymentBadge(r.client);
+          return `<tr class="${r.monthKey===STORE.currentMonth?'fv-current':''}">
+            <td>${escapeHtml(r.label)}</td>
+            <td>${r.client.monthlyRate? fmtMoney(r.client.monthlyRate)+'/mo':'—'}</td>
+            <td>${fmtMoney(r.client.bill)}</td>
+            <td>${fmtMoney(r.client.paid)}</td>
+            <td style="color:var(--coral-500);font-weight:800;">${fmtMoney(due(r.client))}</td>
+            <td><span class="chip ${b.cls}">${b.text}</span></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    ${lastPaidNote}`;
+}
+
+function openHistoryModal(id){
+  const c = findClient(id);
+  if(!c) return;
+  currentProfileId = id;
+  const dim = daysInMonthKey(STORE.currentMonth);
+  const badge = paymentBadge(c);
+
+  document.getElementById('profileModalHead').innerHTML = `
+    <button class="pm-close" onclick="closeProfileModal()">✕</button>
+    <div class="pm-avatar">${initials(c.name)}</div>
+    <div class="pm-info">
+      <h3>${escapeHtml(c.name)}</h3>
+      <p>📍 ${escapeHtml(c.location||'—')} &nbsp;·&nbsp; ${escapeHtml(c.shift||'—')} hr ${escapeHtml(c.type||'')}</p>
+      <div class="pm-chips">
+        <span class="chip ${badge.cls}">${badge.text}</span>
+        <button class="chip chip-btn ${c.status==='active'?'chip-active':'chip-closed'}" onclick="toggleClose('${id}')" title="Click to toggle Active / Inactive — also sets the End Date automatically">${c.status==='active'?'Active':'Inactive'}</button>
+      </div>
+    </div>`;
+
+  renderProfileViewFields(c, dim);
+  renderProfileEditFields(c, dim);
+  cancelProfileEdit(); // always open in read-only view mode
+
+  const chips = [
+    ['Contract', c.monthlyRate? fmtMoney(c.monthlyRate)+'/mo':'—'],
+    ['Per Day', fmtMoney(perDayRate(c))],
+    ['Total Bill', fmtMoney(c.bill)],
+    ['Paid', fmtMoney(c.paid)],
+    ['Total Due', fmtMoney(due(c))],
+  ];
+  document.getElementById('profileSummary').innerHTML = chips.map(([label,value])=>
+    `<div class="hist-chip">${escapeHtml(label)}<span class="n">${escapeHtml(value)}</span></div>`
+  ).join('') + `
+    <div class="hist-chip" style="flex:1 1 100%;">
+      📅 ${fmtDateShort(c.startDate)} → ${fmtDateShort(c.endDate)} &nbsp;·&nbsp; ${fmtDutyLine(c, dim)}
+    </div>`;
+
+  renderFullViewInline(c);
+
+  const tl = document.getElementById('historyTimeline');
+  tl.innerHTML = c.history.map(h=>`
+    <div class="hist-row">
+      <div class="hmain"><b>${escapeHtml(h.text)}</b><span>${fmtDate(h.date)}</span></div>
+    </div>`).join('') || '<div class="hist-empty">No activity yet.</div>';
+
+  openModal('historyModalBackdrop');
+}
+
+document.getElementById('btnOpenTrash').onclick = () => { STORE.view = 'trash'; renderAll(); };
+document.getElementById('btnEmptyTrash').onclick = emptyTrash;
+document.getElementById('btnRestoreLast').onclick = restoreLastDeleted;
+
+document.getElementById('btnSaveMonth').onclick = () => {
+  const month = document.getElementById('m_month').value;
+  const year = document.getElementById('m_year').value;
+  const key = `${year}-${String(new Date(`${month} 1, ${year}`).getMonth()+1).padStart(2,'0')}`;
+  if(STORE.months[key]){ toast('That month already exists.', 'err'); return; }
+  STORE.months[key] = {label: `${month} ${year}`, clients: []};
+  STORE.order.push(key);
+  STORE.order.sort();
+  STORE.currentMonth = key;
+  closeModal('monthModalBackdrop');
+  toast(`${month} ${year} added.`, 'ok');
+  renderAll();
+};
+
+/* ---------------- row-level actions ---------------- */
+function toggleClose(id){
+  const c = findClient(id);
+  if(!c) return;
+  if(c.status === 'active'){
+    if((Number(c.monthlyRate)||0) > 0){
+      const dim = daysInMonthKey(STORE.currentMonth);
+      const input = prompt(
+        `Closing service for ${c.name}.\n\nContract rate: ${fmtMoney(c.monthlyRate)}/month (${dim} days).\nEnter the actual number of days served this month to auto-recalculate the bill, or leave blank to keep the current bill of ${fmtMoney(c.bill)}.`,
+        c.serviceDays || ''
+      );
+      if(input !== null && input.trim() !== ''){
+        const days = Number(input);
+        if(days > 0){
+          const newBill = calcBillFromRate(c.monthlyRate, days, STORE.currentMonth);
+          c.serviceDays = days;
+          c.bill = newBill;
+          addHistory(c, `Service days set to ${days}/${dim} — bill recalculated to ${fmtMoney(newBill)}.`);
+        }
+      }
+    }
+    c.status = 'closed';
+    addHistory(c, 'Service closed.');
+  } else {
+    c.status = 'active';
+    addHistory(c, 'Service reopened.');
+  }
+  afterEdit(id);
+}
+async function deleteClientFromMonth(monthKey, id, skipConfirm){
+  const list = STORE.months[monthKey].clients;
+  const c = list.find(x=>x.id===id);
+  if(!c) return;
+  if(!skipConfirm){
+    const ok = await askConfirm(`Delete "${c.name}" from ${STORE.months[monthKey].label}? You can restore it later from Deleted & Restore.`, 'Delete client?');
+    if(!ok) return;
+  }
+  const idx = list.findIndex(x=>x.id===id);
+  if(idx>-1) list.splice(idx,1);
+  STORE.selected.delete(id);
+  pushTrash({type:'client', monthKey, monthLabel: STORE.months[monthKey].label, client:c});
+  return true;
+}
+async function deleteClient(id){
+  if(await deleteClientFromMonth(STORE.currentMonth, id)){
+    toast('Client deleted — it can be restored from Deleted & Restore.', 'ok');
+    renderAll();
+  }
+}
+
+/* ---------------- whole-month delete ---------------- */
+async function deleteMonth(key){
+  if(STORE.order.length <= 1){ toast('At least one month must remain.', 'err'); return; }
+  const m = STORE.months[key];
+  if(!m) return;
+  const ok = await askConfirm(
+    `Delete "${m.label}" and all ${m.clients.length} client(s) in it? You can restore the whole month later from Deleted & Restore.`,
+    'Delete month?'
+  );
+  if(!ok) return;
+  pushTrash({type:'month', monthKey:key, monthLabel:m.label, monthData: JSON.parse(JSON.stringify(m))});
+  delete STORE.months[key];
+  STORE.order = STORE.order.filter(k=>k!==key);
+  if(STORE.currentMonth === key) STORE.currentMonth = STORE.order[0];
+  STORE.selected.clear();
+  toast(`${m.label} deleted — it can be restored from Deleted & Restore.`, 'ok');
+  renderAll();
+}
+
+/* ---------------- deleted & restore data (recycle bin) ---------------- */
+function findTrashItem(id){ return STORE.trash.find(t=>t.id===id); }
+
+function restoreTrashItem(id){
+  const t = findTrashItem(id);
+  if(!t) return;
+  if(t.type === 'client'){
+    if(!STORE.months[t.monthKey]){
+      STORE.months[t.monthKey] = {label: t.monthLabel, clients: []};
+      STORE.order.push(t.monthKey);
+      STORE.order.sort();
+    }
+    STORE.months[t.monthKey].clients.push(t.client);
+    toast(`${t.client.name} restored to ${STORE.months[t.monthKey].label}.`, 'ok');
+  } else {
+    if(STORE.months[t.monthKey]){
+      toast(`A month called "${t.monthLabel}" already exists — restore skipped.`, 'err');
+      return;
+    }
+    STORE.months[t.monthKey] = t.monthData;
+    STORE.order.push(t.monthKey);
+    STORE.order.sort();
+    STORE.currentMonth = t.monthKey;
+    toast(`${t.monthLabel} restored.`, 'ok');
+  }
+  STORE.trash = STORE.trash.filter(x=>x.id!==id);
+  renderAll();
+}
+
+async function permanentDeleteTrashItem(id){
+  const t = findTrashItem(id);
+  if(!t) return;
+  const label = t.type==='client' ? t.client.name : t.monthLabel;
+  const ok = await askConfirm(`Permanently delete "${label}"? This cannot be undone.`, 'Permanently delete?');
+  if(!ok) return;
+  STORE.trash = STORE.trash.filter(x=>x.id!==id);
+  toast('Permanently deleted.', 'ok');
+  renderAll();
+}
+
+async function emptyTrash(){
+  if(!STORE.trash.length){ toast('Nothing to delete.', 'err'); return; }
+  const ok = await askConfirm(`Permanently delete all ${STORE.trash.length} item(s) in the trash? This cannot be undone.`, 'Empty trash?');
+  if(!ok) return;
+  STORE.trash = [];
+  toast('Trash emptied.', 'ok');
+  renderAll();
+}
+
+function restoreLastDeleted(){
+  if(!STORE.trash.length){ toast('Nothing to restore.', 'err'); return; }
+  restoreTrashItem(STORE.trash[0].id);
+}
+
+function renderTrash(){
+  document.getElementById('trashEmpty').style.display = STORE.trash.length ? 'none' : 'block';
+  document.getElementById('btnRestoreLast').disabled = !STORE.trash.length;
+  document.getElementById('trashList').innerHTML = STORE.trash.map(t=>{
+    if(t.type === 'client'){
+      const c = t.client;
+      return `
+      <div class="dup-row">
+        <div class="dr-main">
+          <b>🧑 ${escapeHtml(c.name)}</b>
+          <span>Client · from ${escapeHtml(t.monthLabel)} · deleted ${fmtDate(t.deletedAt)} · Bill ${fmtMoney(c.bill)} · Paid ${fmtMoney(c.paid)}</span>
+        </div>
+        <div class="row-actions">
+          <button class="icon-btn ib-mint" title="Restore" onclick="restoreTrashItem('${t.id}')">♻️</button>
+          <button class="icon-btn del" title="Permanently delete" onclick="permanentDeleteTrashItem('${t.id}')">🗑️</button>
+        </div>
+      </div>`;
+    }
+    const cnt = (t.monthData.clients || []).length;
+    return `
+      <div class="dup-row">
+        <div class="dr-main">
+          <b>🗓️ ${escapeHtml(t.monthLabel)}</b>
+          <span>Whole month · ${cnt} client(s) · deleted ${fmtDate(t.deletedAt)}</span>
+        </div>
+        <div class="row-actions">
+          <button class="icon-btn ib-mint" title="Restore" onclick="restoreTrashItem('${t.id}')">♻️</button>
+          <button class="icon-btn del" title="Permanently delete" onclick="permanentDeleteTrashItem('${t.id}')">🗑️</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* ---------------- copy to another month ---------------- */
+document.getElementById('btnCopySelected').onclick = () => {
+  const targetKey = document.getElementById('copyTargetSelect').value;
+  if(!targetKey){ toast('Add another month first.', 'err'); return; }
+  const targetClients = STORE.months[targetKey].clients;
+  let count = 0;
+  STORE.selected.forEach(id=>{
+    const c = findClient(id);
+    if(!c) return;
+    const clone = makeClient({
+      name:c.name, phone:c.phone, location:c.location, shift:c.shift, type:c.type,
+      startDate: targetKey+'-01', endDate: targetKey+'-28',
+      bill:c.bill, monthlyRate:c.monthlyRate||0, serviceDays:null,
+      paid:0, advance:c.advance||0, notes:c.notes, status:'active'
+    });
+    clone.history.push({date: todayISO(), text: `Copied from ${STORE.months[STORE.currentMonth].label}.`});
+    targetClients.push(clone);
+    addHistory(c, `Copied to ${STORE.months[targetKey].label}.`);
+    count++;
+  });
+  STORE.selected.clear();
+  toast(`${count} client(s) copied to ${STORE.months[targetKey].label}.`, 'ok');
+  renderAll();
+};
+
+/* ---------------- search / filter / sort ---------------- */
+document.getElementById('searchInput').addEventListener('input', e=>{
+  STORE.search = e.target.value;
+  renderCurrentListView();
+});
+document.getElementById('filterStatus').addEventListener('change', e=>{
+  STORE.filter = e.target.value;
+  renderCurrentListView();
+});
+document.getElementById('profileSearchInput').addEventListener('input', e=>{
+  STORE.search = e.target.value;
+  renderCurrentListView();
+});
+document.getElementById('profileFilterStatus').addEventListener('change', e=>{
+  STORE.filter = e.target.value;
+  renderCurrentListView();
+});
+document.querySelectorAll('#clientsTable thead th[data-sort]').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const key = th.dataset.sort;
+    if(STORE.sortKey===key) STORE.sortDir *= -1; else { STORE.sortKey=key; STORE.sortDir=1; }
+    renderClientsTable();
+  });
+});
+document.getElementById('selectAll').addEventListener('change', e=>{
+  const list = getFilteredSortedClients();
+  if(e.target.checked) list.forEach(c=>STORE.selected.add(c.id));
+  else list.forEach(c=>STORE.selected.delete(c.id));
+  renderClientsTable();
+  updateCopyButtonState();
+});
+document.getElementById('btnMarkPaid').onclick = markSelectedPaid;
+document.getElementById('btnAddClientInline').onclick = openAddModal;
+
+/* ---------------- export current month (Excel) ---------------- */
+document.getElementById('btnExportCsv').onclick = () => {
+  if(typeof XLSX==='undefined'){ toast('Excel engine did not load — check your internet connection and try again.', 'err'); return; }
+  const list = currentClients();
+  const rows = list.map(c=>({
+    Name:c.name, Phone:c.phone, Location:c.location, Shift:c.shift, Type:c.type,
+    'Start Date':c.startDate, 'End Date':c.endDate, 'Monthly Rate':c.monthlyRate||0,
+    'Days Billed':c.serviceDays||'Full month', Bill:c.bill, Paid:c.paid, Due:due(c),
+    Advance:c.advance||0, 'Payment Status':paymentBadge(c).text, 'Service Status':c.status==='active'?'Active':'Closed'
+  }));
+  const wb = XLSX.utils.book_new();
+  const sheet = XLSX.utils.json_to_sheet(rows.length ? rows : [{}]);
+  XLSX.utils.book_append_sheet(wb, sheet, monthSheetName(STORE.months[STORE.currentMonth].label));
+  XLSX.writeFile(wb, `DHC-${STORE.currentMonth}-clients.xlsx`);
+  toast('Data exported as Excel.', 'ok');
+};
+
+/* ---------------- import current month (Excel) ---------------- */
+function normalizeRowKeys(row){
+  const out = {};
+  Object.keys(row).forEach(k => { out[k.trim().toLowerCase()] = row[k]; });
+  return out;
+}
+function importCsvFile(file){
+  if(typeof XLSX==='undefined'){ toast('Excel engine did not load — check your internet connection and try again.', 'err'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+      const sheetName = wb.SheetNames[0];
+      const rawRows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {defval:''});
+      if(!rawRows.length){ toast('That Excel file has no data rows.', 'err'); return; }
+      let count = 0;
+      rawRows.forEach(raw=>{
+        const r = normalizeRowKeys(raw);
+        const name = r['name']||r['client name']||r['client / patient name'];
+        if(!name) return;
+        const c = makeClient({
+          name,
+          phone: r['phone']||r['phone number']||'',
+          location: r['location']||'',
+          shift: (r['shift']||'12').toString(),
+          type: r['type']||'',
+          startDate: r['start date']||STORE.currentMonth+'-01',
+          endDate: r['end date']||STORE.currentMonth+'-28',
+          monthlyRate: Number(r['monthly rate']||r['contract (৳/mo)']||0)||0,
+          serviceDays: r['days billed']&&r['days billed']!=='Full month' ? Number(r['days billed'])||null : null,
+          paid: Number(r['paid']||0)||0,
+          advance: Number(r['advance']||0)||0,
+          status: (r['service status']||'').toString().toLowerCase().startsWith('clos') ? 'closed' : 'active',
+          notes: r['notes']||''
+        });
+        autoCalcBill(c);
+        currentClients().push(c);
+        count++;
+      });
+      toast(`${count} client(s) imported into ${STORE.months[STORE.currentMonth].label}.`, 'ok');
+      renderAll();
+    }catch(err){
+      console.error(err);
+      toast('Could not read that Excel file.', 'err');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+document.getElementById('btnImportCsv').onclick = () => document.getElementById('csvImportInput').click();
+document.getElementById('csvImportInput').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(file) importCsvFile(file);
+  e.target.value = '';
+});
+
+/* ---------------- backup / restore buttons ---------------- */
+document.getElementById('btnBackup').onclick = exportBackup;
+document.getElementById('btnRestore').onclick = () => document.getElementById('fileImportInput').click();
+document.getElementById('fileImportInput').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(file) importBackup(file);
+  e.target.value = '';
+});
+
+document.getElementById('btnFullBackup').onclick = exportFullBackup;
+document.getElementById('btnFullRestore').onclick = () => document.getElementById('fullRestoreInput').click();
+document.getElementById('fullRestoreInput').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(file) restoreFullBackup(file);
+  e.target.value = '';
+});
+
+
+/* ---------------- GOOGLE DRIVE AUTO-SYNC ---------------- */
+// Optional: paste your Client ID here to skip the Setup box.  e.g. '1234-abc.apps.googleusercontent.com'
+const GOOGLE_CLIENT_ID = '';
+const GD = {
+  scope:'https://www.googleapis.com/auth/drive.file',
+  fileName:'DHCL-Client-Manager-Data.json',
+  K_ID:'dhc_gdrive_client_id', K_ON:'dhc_gdrive_enabled', K_FILE:'dhc_gdrive_file_id', K_STAMP:'dhc_gdrive_last_stamp',
+  token:null, tokenExp:0, tokenClient:null, tokenClientId:null,
+  enabled: localStorage.getItem('dhc_gdrive_enabled')==='1',
+  fileId: localStorage.getItem('dhc_gdrive_file_id') || null,
+  lastStamp: Number(localStorage.getItem('dhc_gdrive_last_stamp')||0),
+  uploading:false, pending:false, timer:null, lastSyncAt:0, busy:false, poll:null
+};
+function gdClientId(){ return (GOOGLE_CLIENT_ID || localStorage.getItem(GD.K_ID) || '').trim(); }
+function gdSetStamp(v){ GD.lastStamp = v; try{ localStorage.setItem(GD.K_STAMP, String(v)); }catch(e){} }
+function gdUi(kind, msg){
+  const badge = document.getElementById('gdBadge'), st = document.getElementById('gdStatus');
+  if(!badge) return;
+  const map = { off:['Not connected',''], ok:['Synced ✓','ok'], busy:['Syncing…','busy'], pending:['Saving soon…','busy'], bad:['Needs attention','bad'] };
+  const m = map[kind] || map.off;
+  badge.textContent = m[0]; badge.className = 'gd-badge ' + m[1];
+  st.textContent = msg || '';
+  document.getElementById('btnGdConnect').style.display = GD.enabled && kind!=='bad' ? 'none' : '';
+  document.getElementById('btnGdConnect').textContent = GD.enabled ? '🔗 Reconnect' : '🔗 Connect Google Drive';
+  document.getElementById('btnGdSync').style.display = GD.enabled ? '' : 'none';
+  document.getElementById('btnGdDisconnect').style.display = GD.enabled ? '' : 'none';
+  const o = document.getElementById('gdOrigin'); if(o) o.textContent = location.origin==='null' ? '(open the hosted https address)' : location.origin;
+  const inp = document.getElementById('gdClientIdInput'); if(inp && !inp.value) inp.value = localStorage.getItem(GD.K_ID) || '';
+}
+function gdTimeText(){ return GD.lastSyncAt ? 'Last saved to Drive at ' + new Date(GD.lastSyncAt).toLocaleTimeString() : ''; }
+function gdLoadLib(){
+  return new Promise((resolve,reject)=>{
+    if(window.google && google.accounts && google.accounts.oauth2) return resolve();
+    const el = document.createElement('script');
+    el.src = 'https://accounts.google.com/gsi/client'; el.async = true;
+    el.onload = () => resolve();
+    el.onerror = () => reject(new Error('offline'));
+    document.head.appendChild(el);
+  });
+}
+function gdAuth(interactive){
+  return new Promise(async (resolve,reject)=>{
+    try{
+      await gdLoadLib();
+      const cid = gdClientId();
+      if(!cid) return reject(new Error('noid'));
+      if(!GD.tokenClient || GD.tokenClientId !== cid){
+        GD.tokenClientId = cid;
+        GD.tokenClient = google.accounts.oauth2.initTokenClient({ client_id:cid, scope:GD.scope, callback:()=>{}, error_callback:()=>{} });
+      }
+      GD.tokenClient.callback = resp => {
+        if(resp.error) return reject(new Error(resp.error));
+        GD.token = resp.access_token;
+        GD.tokenExp = Date.now() + (Number(resp.expires_in||3600) - 90) * 1000;
+        resolve(GD.token);
+      };
+      GD.tokenClient.error_callback = err => reject(new Error((err && err.type) || 'popup_error'));
+      GD.tokenClient.requestAccessToken({ prompt: interactive ? '' : 'none' });
+    }catch(e){ reject(e); }
+  });
+}
+async function gdToken(){
+  if(GD.token && Date.now() < GD.tokenExp) return GD.token;
+  return gdAuth(false);
+}
+async function gdFetch(url, opts, retried){
+  const tok = await gdToken();
+  opts = opts || {};
+  opts.headers = Object.assign({}, opts.headers, { Authorization: 'Bearer ' + tok });
+  const res = await fetch(url, opts);
+  if(res.status === 401 && !retried){ GD.token = null; return gdFetch(url, opts, true); }
+  return res;
+}
+async function gdFindFile(){
+  const q = encodeURIComponent(`name='${GD.fileName}' and trashed=false`);
+  const res = await gdFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=drive&orderBy=modifiedTime desc&fields=files(id,modifiedTime,appProperties)`);
+  if(!res.ok) throw new Error('find ' + res.status);
+  const j = await res.json();
+  return (j.files && j.files[0]) || null;
+}
+async function gdMeta(id){
+  const res = await gdFetch(`https://www.googleapis.com/drive/v3/files/${id}?fields=id,modifiedTime,appProperties,trashed`);
+  if(res.status === 404) return null;
+  if(!res.ok) throw new Error('meta ' + res.status);
+  const j = await res.json();
+  return j.trashed ? null : j;
+}
+function gdRemoteStamp(meta){ return Number(meta && meta.appProperties && meta.appProperties.savedAt) || 0; }
+function gdPayload(){
+  return { app:'DHCL Client & Payment Manager', type:'full-backup', version:3, savedAt:STORE.savedAt, exportedAt:new Date().toISOString(),
+    data:{ order:STORE.order, months:STORE.months, leads:STORE.leads||[], trash:STORE.trash||[], currentMonth:STORE.currentMonth } };
+}
+async function gdUpload(){
+  const stamp = STORE.savedAt || Date.now();
+  const payload = gdPayload(); payload.savedAt = stamp;
+  const meta = { name:GD.fileName, mimeType:'application/json', appProperties:{ savedAt:String(stamp) } };
+  const b = 'dhcl' + Math.random().toString(36).slice(2);
+  const body = `--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(payload)}\r\n--${b}--`;
+  const url = GD.fileId
+    ? `https://www.googleapis.com/upload/drive/v3/files/${GD.fileId}?uploadType=multipart&fields=id`
+    : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id`;
+  const res = await gdFetch(url, { method: GD.fileId ? 'PATCH' : 'POST', headers:{ 'Content-Type':'multipart/related; boundary=' + b }, body });
+  if(!res.ok) throw new Error('upload ' + res.status);
+  const j = await res.json();
+  GD.fileId = j.id; try{ localStorage.setItem(GD.K_FILE, GD.fileId); }catch(e){}
+  gdSetStamp(stamp);
+  GD.lastSyncAt = Date.now();
+}
+async function gdPull(meta){
+  const res = await gdFetch(`https://www.googleapis.com/drive/v3/files/${meta.id}?alt=media`);
+  if(!res.ok) throw new Error('download ' + res.status);
+  const parsed = await res.json();
+  const data = parsed && parsed.data ? parsed.data : parsed;
+  if(!data || !Array.isArray(data.order) || !data.months || !data.order.length) throw new Error('bad remote data');
+  STORE.order = data.order; STORE.months = data.months;
+  STORE.leads = data.leads || []; STORE.trash = data.trash || [];
+  STORE.currentMonth = data.months[data.currentMonth] ? data.currentMonth : data.order[0];
+  STORE.selected.clear();
+  let maxNum = 0;
+  Object.values(STORE.months).forEach(m => (m.clients||[]).forEach(c=>{ const mt=/^c(\d+)_/.exec(c.id||''); if(mt) maxNum=Math.max(maxNum,parseInt(mt[1])); }));
+  STORE.leads.forEach(l=>{ const mt=/^c(\d+)_/.exec(l.id||''); if(mt) maxNum=Math.max(maxNum,parseInt(mt[1])); });
+  uidCounter = Math.max(uidCounter, maxNum + 1);
+  const stamp = Number(parsed.savedAt) || gdRemoteStamp(meta) || Date.now();
+  STORE.savedAt = stamp; gdSetStamp(stamp);
+  GD.fileId = meta.id; try{ localStorage.setItem(GD.K_FILE, GD.fileId); }catch(e){}
+  lastDataStr = dataString();
+  writeLocal();
+  GD.lastSyncAt = Date.now();
+  renderAll();
+}
+// Decide what to do by comparing this device with Google Drive.
+async function gdReconcile(meta, opts){
+  opts = opts || {};
+  if(!meta){ await gdUpload(); return 'pushed'; }
+  const remoteStamp = gdRemoteStamp(meta);
+  const localChanged = STORE.savedAt > GD.lastStamp;
+  const remoteChanged = remoteStamp > GD.lastStamp;
+  if(!localChanged && !remoteChanged) return 'same';
+  if(remoteChanged && !localChanged){ await gdPull(meta); if(opts.announce) toast('Updated from Google Drive.', 'ok'); return 'pulled'; }
+  if(localChanged && !remoteChanged){ await gdUpload(); return 'pushed'; }
+  const useDrive = await askConfirm('Both this device and Google Drive have newer changes (probably edited on another device).\n\nOK = use the Google Drive version (replaces this device).\nCancel = keep this device version (overwrites Drive).\n\nTip: press Download Full Backup first if unsure.', 'Choose which version to keep');
+  if(useDrive){ await gdPull(meta); return 'pulled'; }
+  await gdUpload(); return 'pushed';
+}
+async function gdSync(opts){
+  if(GD.busy || GD.uploading) return;
+  GD.busy = true; gdUi('busy', 'Syncing with Google Drive…');
+  try{
+    let meta = GD.fileId ? await gdMeta(GD.fileId) : null;
+    if(!meta){ GD.fileId = null; const f = await gdFindFile(); meta = f; }
+    const r = await gdReconcile(meta, opts);
+    gdUi('ok', gdTimeText() || 'Up to date with Google Drive.');
+    return r;
+  }catch(err){ gdFail(err); }
+  finally{ GD.busy = false; }
+}
+function gdFail(err){
+  console.error('Drive sync', err);
+  const m = String(err && err.message || err);
+  let text = 'Sync problem — your data is safe on this device. ';
+  if(m==='offline') text += 'No internet connection; it will sync when you are back online.';
+  else if(m==='noid') text += 'Add your Google Client ID in the setup box.';
+  else if(/popup|interaction|access_denied|immediate|login_required/i.test(m)) text += 'Please press Reconnect and sign in again.';
+  else if(/ 403|403/.test(m)) text += 'Google refused access (is the Drive API enabled?).';
+  else text += 'Press Sync now to retry.';
+  gdUi('bad', text);
+}
+function gdOnLocalChange(){
+  if(!GD.enabled) return;
+  GD.pending = true;
+  clearTimeout(GD.timer);
+  gdUi('pending', 'Changes will be saved to Google Drive in a moment…');
+  GD.timer = setTimeout(gdPush, 2500);
+}
+async function gdPush(){
+  if(!GD.enabled) return;
+  if(GD.uploading || GD.busy){ clearTimeout(GD.timer); GD.timer = setTimeout(gdPush, 2000); return; }
+  GD.uploading = true; GD.pending = false;
+  gdUi('busy', 'Saving to Google Drive…');
+  try{
+    let meta = GD.fileId ? await gdMeta(GD.fileId) : null;
+    if(!meta){ GD.fileId = null; meta = await gdFindFile(); }
+    await gdReconcile(meta);
+    gdUi('ok', gdTimeText());
+  }catch(err){ GD.pending = true; gdFail(err); }
+  finally{
+    GD.uploading = false;
+    if(GD.pending && GD.enabled && document.getElementById('gdBadge').className.indexOf('bad')<0){ clearTimeout(GD.timer); GD.timer = setTimeout(gdPush, 1500); }
+  }
+}
+async function gdConnect(){
+  if(location.protocol === 'file:'){
+    gdUi('bad', 'Google sign-in does not work when the file is opened from your computer. Host it at an https address first (see One-time setup).');
+    document.getElementById('gdSetup').open = true; return;
+  }
+  if(!gdClientId()){ document.getElementById('gdSetup').open = true; gdFail(new Error('noid')); return; }
+  gdUi('busy', 'Opening Google sign-in…');
+  try{
+    await gdAuth(true);
+    GD.enabled = true; try{ localStorage.setItem(GD.K_ON, '1'); }catch(e){}
+    await gdSync({announce:true});
+    gdStartWatching();
+  }catch(err){ GD.enabled = localStorage.getItem(GD.K_ON)==='1'; gdFail(err); }
+}
+function gdDisconnect(){
+  try{ if(GD.token && window.google && google.accounts) google.accounts.oauth2.revoke(GD.token, ()=>{}); }catch(e){}
+  GD.enabled = false; GD.token = null; GD.fileId = null; GD.pending = false; clearTimeout(GD.timer);
+  ['K_ON','K_FILE','K_STAMP'].forEach(k=>{ try{ localStorage.removeItem(GD[k]); }catch(e){} });
+  gdSetStamp(0);
+  gdUi('off', 'Disconnected. Your data stays on this device; the file in your Drive was not deleted.');
+  toast('Google Drive sync turned off.', 'ok');
+}
+function gdStartWatching(){
+  if(GD.poll) return;
+  GD.poll = setInterval(()=>{ if(GD.enabled && !GD.pending && !GD.uploading && document.visibilityState==='visible') gdSync({announce:true}); }, 60000);
+}
+document.getElementById('btnGdConnect').onclick = gdConnect;
+document.getElementById('btnGdSync').onclick = async () => {
+  try{ if(!GD.token || Date.now()>=GD.tokenExp) await gdAuth(true); }catch(e){ gdFail(e); return; }
+  const r = await gdSync({announce:true});
+  if(r==='same') toast('Already up to date.', 'ok');
+};
+document.getElementById('btnGdDisconnect').onclick = gdDisconnect;
+document.getElementById('btnGdSaveId').onclick = () => {
+  const v = document.getElementById('gdClientIdInput').value.trim();
+  if(!/\.apps\.googleusercontent\.com$/.test(v)){ toast('That does not look like a Google Client ID.', 'err'); return; }
+  localStorage.setItem(GD.K_ID, v); toast('Client ID saved. Now press Connect Google Drive.', 'ok');
+  gdUi(GD.enabled?'ok':'off', '');
+};
+document.addEventListener('visibilitychange', ()=>{
+  if(!GD.enabled) return;
+  if(document.visibilityState==='hidden' && GD.pending){ clearTimeout(GD.timer); gdPush(); }
+  if(document.visibilityState==='visible' && !GD.pending) gdSync({announce:true});
+});
+window.addEventListener('online', ()=>{ if(GD.enabled){ GD.pending ? gdPush() : gdSync({announce:true}); } });
+window.addEventListener('beforeunload', e=>{ if(GD.enabled && (GD.pending || GD.uploading)){ e.preventDefault(); e.returnValue=''; } });
+(function gdResume(){
+  gdUi(GD.enabled ? 'busy' : 'off', GD.enabled ? 'Reconnecting to Google Drive…' : 'Press Connect to start saving to your Google Drive.');
+  if(GD.enabled && location.protocol !== 'file:'){
+    gdStartWatching();
+    gdSync({announce:true});
+  }
+})();
+
+/* ---------------- init ---------------- */
+renderAll();
+</script>
+</body>
+</html>
